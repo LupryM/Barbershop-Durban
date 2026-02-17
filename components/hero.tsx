@@ -1,9 +1,9 @@
-import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import React from "react";
+import { ChevronDown } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#121212]">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img
@@ -11,7 +11,7 @@ export function Hero() {
           alt="Xclusive Barber"
           className="w-full h-full object-cover opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#121212]/90" />
       </div>
 
       {/* Content */}
@@ -20,7 +20,9 @@ export function Hero() {
           Where Style Meets Excellence
         </h1>
         <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed text-pretty">
-          Durban's premier destination for precision cuts, expert beard grooming, and timeless style. Experience the art of barbering redefined.
+          Durban's premier destination for precision cuts, expert beard
+          grooming, and timeless style. Experience the art of barbering
+          redefined.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
