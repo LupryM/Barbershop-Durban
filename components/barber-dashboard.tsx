@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, LogOut, Home } from 'lucide-react';
+import { Calendar, Clock, LogOut, Home, User } from 'lucide-react';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
-import type { User } from '@/lib/auth';
-import Image from 'next/image';
+import { toast, Toaster } from 'sonner';
 import Link from 'next/link';
+
+interface UserData {
+  name: string;
+  role: string;
+}
 
 interface Appointment {
   id: number;
@@ -20,7 +23,7 @@ interface Appointment {
   customer_phone: string;
 }
 
-export function BarberDashboard({ user }: { user: User }) {
+export function BarberDashboard({ user }: { user: UserData }) {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,38 +37,45 @@ export function BarberDashboard({ user }: { user: User }) {
       const response = await fetch('/api/appointments');
       const data = await response.json();
       if (response.ok) setAppointments(data.appointments);
-    } catch (error) {
-      toast.error('Failed to load appointments');
+    } catch {
+      // silently handle - testing mode
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
+  const handleLogout = () => {
+    localStorage.removeItem('xclusiveUser');
+    router.push('/');
     router.refresh();
   };
 
   const upcoming = appointments.filter(a => a.status !== 'cancelled' && a.status !== 'completed');
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-white text-black">
+      <Toaster position="top-center" expand={true} richColors />
+
       {/* Header */}
-      <header className="border-b border-white/5">
+      <header className="border-b border-black/5">
         <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Image src="/logo.jpeg" alt="Xclusive Barber" width={40} height={40} />
-            <div>
-              <h1 className="text-xl font-light tracking-tighter">MY SCHEDULE</h1>
-              <p className="text-white/40 text-xs">Welcome, {user.name}</p>
-            </div>
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img src="/logo.png" alt="Xclusive Barber Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-xl font-light tracking-tighter">XCLUSIVE BARBER</span>
+            </Link>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-xs text-white/40 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-black/40 font-medium">
+              <User className="w-3 h-3" />
+              {user.name}
+            </div>
+            <Link href="/" className="text-[11px] text-black/40 hover:text-black transition-colors uppercase tracking-[0.2em] font-medium flex items-center gap-2">
               <Home className="w-3 h-3" /> Home
             </Link>
-            <button onClick={handleLogout} className="text-xs text-white/40 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-2">
+            <button onClick={handleLogout} className="text-[11px] text-black/40 hover:text-black transition-colors uppercase tracking-[0.2em] font-medium flex items-center gap-2">
               <LogOut className="w-3 h-3" /> Logout
             </button>
           </div>
@@ -73,42 +83,48 @@ export function BarberDashboard({ user }: { user: User }) {
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <span className="text-white/40 uppercase tracking-widest text-xs mb-6 block">Upcoming Appointments</span>
-        
+        <div className="mb-12">
+          <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">My Schedule</span>
+          <h1 className="text-4xl md:text-5xl font-light tracking-tight">
+            Upcoming Appointments
+          </h1>
+        </div>
+
         {loading ? (
           <div className="text-center py-24">
-            <div className="inline-block w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <div className="inline-block w-8 h-8 border-2 border-black/10 border-t-black rounded-full animate-spin" />
           </div>
         ) : upcoming.length === 0 ? (
-          <div className="border border-white/10 p-16 text-center">
-            <p className="text-white/40 text-sm">No upcoming appointments</p>
+          <div className="border-2 border-black/10 p-16 text-center">
+            <Calendar className="w-12 h-12 text-black/15 mx-auto mb-6" />
+            <p className="text-black/40 text-sm">No upcoming appointments</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {upcoming.map((appointment) => (
-              <div key={appointment.id} className="border border-white/10 p-6 hover:border-white/20 transition-colors">
+              <div key={appointment.id} className="border-2 border-black/10 p-6 hover:border-accent/30 transition-colors">
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h3 className="text-lg font-light">{appointment.service_name}</h3>
-                    <p className="text-xs text-white/40 mt-1">{appointment.customer_name}</p>
-                    <p className="text-xs text-white/30">{appointment.customer_phone}</p>
+                    <p className="text-xs text-black/40 mt-1">{appointment.customer_name}</p>
+                    <p className="text-xs text-black/30">{appointment.customer_phone}</p>
                   </div>
                   <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-medium ${
-                    appointment.status === 'confirmed' ? 'bg-white/10 text-white/80' : 'bg-white/5 text-white/40'
+                    appointment.status === 'confirmed' ? 'bg-accent text-accent-foreground' : 'bg-black/5 text-black/40'
                   }`}>
                     {appointment.status}
                   </span>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-white/60">
-                    <Calendar className="w-4 h-4 text-white/30" />
+                  <div className="flex items-center gap-3 text-sm text-black/60">
+                    <Calendar className="w-4 h-4 text-black/30" />
                     {format(new Date(appointment.appointment_date), 'EEEE, MMMM d, yyyy')}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white/60">
-                    <Clock className="w-4 h-4 text-white/30" />
+                  <div className="flex items-center gap-3 text-sm text-black/60">
+                    <Clock className="w-4 h-4 text-black/30" />
                     {appointment.appointment_time}
                   </div>
-                  <div className="text-sm font-medium text-white/80">{appointment.service_price}</div>
+                  <div className="text-sm font-medium">{appointment.service_price}</div>
                 </div>
               </div>
             ))}

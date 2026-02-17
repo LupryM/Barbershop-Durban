@@ -7,9 +7,9 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Xclusive Barber - Premium Barbershop in Durban, South Africa",
+  title: "XCLUSIVE BARBER - Davenport, Durban | All Types of XCLUSIVE Haircuts",
   description:
-    "Experience excellence at Xclusive Barber in Durban. Premium haircuts, expert beard grooming, and traditional shaves. Book your appointment today.",
+    "XCLUSIVE BARBER in Davenport, Durban. All types of XCLUSIVE haircuts, hair colouring, bald cuts (chiskop), beard services, and hectic designs. Book now at 121 Helen Joseph Rd, Bulwer.",
   generator: "v0.app",
   icons: {
     icon: [

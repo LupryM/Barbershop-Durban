@@ -43,7 +43,6 @@ export async function getSession(): Promise<{ user: User | null }> {
       }
     };
   } catch (error) {
-    console.error('[v0] Session error:', error);
     return { user: null };
   }
 }

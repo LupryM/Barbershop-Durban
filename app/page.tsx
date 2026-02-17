@@ -68,12 +68,12 @@ export default function App() {
             <a href="#location" className="hover:text-black transition-colors">
               Location
             </a>
-            <a href="/login" className="hover:text-black transition-colors">
-              Login
+            <a href="/dashboard" className="hover:text-black transition-colors">
+              My Bookings
             </a>
             <a
               href="#book"
-              className="px-6 py-2 border border-black/10 text-black hover:bg-black hover:text-white transition-all"
+              className="px-6 py-2 bg-accent text-accent-foreground hover:opacity-90 transition-all font-medium"
             >
               Book Now
             </a>
@@ -118,7 +118,7 @@ export default function App() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="hover:text-black"
               >
-                Login
+                Login / Sign Up
               </a>
               <a
                 href="/dashboard"

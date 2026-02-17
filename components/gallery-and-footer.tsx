@@ -18,25 +18,24 @@ export function Footer() {
               XCLUSIVE BARBER
             </h3>
             <p className="text-sm text-black/50 leading-relaxed max-w-xs">
-              Durban's premier barbershop delivering exceptional grooming
-              experiences through precision, style, and unmatched expertise.
+              Davenport's barbershop for all types of XCLUSIVE haircuts, hair colouring, bald cuts, beard services, and hectic designs.
             </p>
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Twitter className="w-4 h-4" />
               </a>
@@ -98,17 +97,17 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  Durban, <br />
-                  KwaZulu-Natal, South Africa
+                  121 Helen Joseph Rd, Bulwer, <br />
+                  Davenport, Durban, 4001
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+27 (0) 82 123 4567</span>
+                <span>+27 67 886 4334</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>info@xclusivebarber.co.za</span>
+                <span>ebarbershop988@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -136,7 +135,7 @@ export function Footer() {
 
         <div className="pt-12 border-t border-black/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-black/30">
           <p>
-            © 2025 Xclusive Barber - Durban, South Africa. All Rights Reserved.
+            © 2025 XCLUSIVE BARBER - Davenport, Durban. All Rights Reserved.
           </p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-black/60">

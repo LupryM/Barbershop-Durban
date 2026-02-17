@@ -1,33 +1,33 @@
 import React from "react";
-import { Scissors, Zap, Shield, Sparkles } from "lucide-react";
+import { Scissors, Paintbrush, CircleDot, Smile } from "lucide-react";
 
 const serviceCategories = [
   {
     icon: Scissors,
-    title: "The Cut",
+    title: "XCLUSIVE Haircut",
     description:
-      "Signature consultation, precision haircut, wash, and styling.",
-    price: "R250",
+      "Normal haircut (R100), Haircut with dye (R150), Full house with dye and fibre (R180)",
+    price: "From R100",
   },
   {
-    icon: Zap,
-    title: "The Beard",
-    description: "Beard sculpting, line-up, and hot towel treatment.",
-    price: "R150",
+    icon: Paintbrush,
+    title: "Hair Colouring",
+    description: "Black (R100), Blond (R100), White (R200)",
+    price: "From R100",
   },
   {
-    icon: Shield,
-    title: "The Shave",
+    icon: CircleDot,
+    title: "XCLUSIVE Bald Cut",
     description:
-      "Traditional straight-razor shave with pre-shave oils and hot towels.",
-    price: "R200",
+      "Clipper chiskop (R60), Razor blade chiskop (R70)",
+    price: "From R60",
   },
   {
-    icon: Sparkles,
-    title: "The Ritual",
+    icon: Smile,
+    title: "XCLUSIVE Beard",
     description:
-      "The ultimate experience: Haircut, beard, nose wax, and facial.",
-    price: "R500",
+      "Beard shave (R20), Beard with dye (R50)",
+    price: "From R20",
   },
 ];
 
@@ -42,26 +42,26 @@ export function Services() {
           <div className="space-y-12">
             <div>
               <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">
-                Our Expertise
+                XCLUSIVE Services
               </span>
               <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
-                Premium grooming for <br />
-                the modern gentleman.
+                All types of XCLUSIVE <br />
+                cuts and styles.
               </h2>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-x-12 gap-y-16">
               {serviceCategories.map((service, index) => (
                 <div key={index} className="space-y-4 group">
-                  <div className="w-12 h-12 flex items-center justify-center border border-black/10 rounded-full group-hover:bg-black group-hover:text-white transition-all duration-300">
-                    <service.icon className="w-5 h-5 text-black/60 group-hover:text-white" />
+                  <div className="w-12 h-12 flex items-center justify-center border-2 border-black/10 rounded-full group-hover:bg-accent group-hover:border-accent group-hover:text-accent-foreground transition-all duration-300">
+                    <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-light">{service.title}</h3>
+                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">{service.title}</h3>
                     <p className="text-sm text-black/50 leading-relaxed">
                       {service.description}
                     </p>
-                    <p className="text-sm font-medium pt-2">{service.price}</p>
+                    <p className="text-sm font-medium pt-2 text-accent">{service.price}</p>
                   </div>
                 </div>
               ))}
@@ -77,7 +77,7 @@ export function Services() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute bottom-10 left-10">
               <p className="text-white italic font-serif text-xl drop-shadow-md">
-                "Details define the man."
+                "XCLUSIVE PROMO: Cut 3 Haircuts get 1 FREE"
               </p>
             </div>
           </div>
