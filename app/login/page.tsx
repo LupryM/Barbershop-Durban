@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, KeyRound, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
-import Image from "next/image";
+import { ArrowLeft, User, ShieldCheck } from "lucide-react";
+import { toast, Toaster } from "sonner";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -15,11 +14,15 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
-      const user = { name: name || "Guest", role };
+      const user = { name: name.trim(), role };
       localStorage.setItem("xclusiveUser", JSON.stringify(user));
-      toast.success("Welcome to Xclusive Barber!");
+      toast.success("Welcome to XCLUSIVE BARBER!");
       router.push("/dashboard");
       router.refresh();
       setLoading(false);
@@ -27,35 +30,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col bg-white">
-      {/* Background with overlay to match Hero theme */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920"
-          alt="Barbershop Background"
-          className="w-full h-full object-cover opacity-10"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/80 to-white" />
-      </div>
+    <div className="min-h-screen bg-white">
+      <Toaster position="top-center" expand={true} richColors />
 
       {/* Nav */}
-      <nav className="relative z-10 px-6 py-6">
+      <nav className="px-6 py-6 border-b border-black/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/logo2 (2).png"
-              alt="Xclusive Barber"
-              width={40}
-              height={40}
-              className="rounded-sm"
-            />
-            <span className="text-lg font-light tracking-tighter text-black">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Xclusive Barber Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-xl font-light tracking-tighter text-black">
               XCLUSIVE BARBER
             </span>
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-black/60 hover:text-black transition-colors"
+            className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-black/40 hover:text-black transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to site
@@ -64,66 +59,81 @@ export default function LoginPage() {
       </nav>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-6 pb-16">
-        <div className="w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/40 p-8 md:p-12 rounded-xl shadow-2xl ring-1 ring-black/5">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-light tracking-tight text-black mb-3">
+      <div className="flex-1 flex items-center justify-center px-6 py-24">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-12">
+            <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">
+              Sign In
+            </span>
+            <h1 className="text-4xl md:text-5xl font-light tracking-tight text-black mb-4">
               Welcome Back
             </h1>
-            <p className="text-black/50 text-sm">
-              Sign in with your phone number to manage appointments
+            <p className="text-black/50 text-sm leading-relaxed">
+              Sign in to manage your appointments and bookings
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="block text-xs uppercase tracking-widest text-black/50 font-medium"
-              >
-                Your Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="w-full px-4 py-3.5 bg-black/[0.03] border border-black/10 rounded-lg text-black placeholder:text-black/20 focus:border-black/30 focus:outline-none focus:bg-white transition-all"
-              />
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor="name"
+                  className="block text-xs uppercase tracking-widest text-black/40 font-medium"
+                >
+                  Your Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-accent focus:outline-none transition-all bg-white"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="role"
+                  className="block text-xs uppercase tracking-widest text-black/40 font-medium"
+                >
+                  Role
+                </label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black focus:border-accent focus:outline-none transition-all bg-white appearance-none"
+                  >
+                    <option value="customer">Customer</option>
+                    <option value="barber">Barber</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="role"
-                className="block text-xs uppercase tracking-widest text-black/50 font-medium"
-              >
-                Role
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3.5 bg-black/[0.03] border border-black/10 rounded-lg text-black focus:border-black/30 focus:outline-none focus:bg-white transition-all"
-              >
-                <option value="customer">Customer</option>
-                <option value="barber">Barber</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-accent text-accent-foreground py-3.5 rounded-lg font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg"
+              className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
-        </div>
 
-        <div className="absolute bottom-6 left-0 right-0 text-center">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-black/20">
-            Need help? Call +27 (0) 82 123 4567
-          </p>
+          <div className="mt-12 text-center">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-black/30">
+              Need help? Call{" "}
+              <a href="tel:+27678864334" className="text-black/50 hover:text-black transition-colors">
+                +27 67 886 4334
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

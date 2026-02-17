@@ -1,5 +1,5 @@
 import React from "react";
-import { Scissors, Zap, Shield, Sparkles } from "lucide-react";
+import { Scissors, Paintbrush, CircleDot, Smile } from "lucide-react";
 
 const serviceCategories = [
   {
@@ -10,20 +10,20 @@ const serviceCategories = [
     price: "From R100",
   },
   {
-    icon: Sparkles,
+    icon: Paintbrush,
     title: "Hair Colouring",
     description: "Black (R100), Blond (R100), White (R200)",
     price: "From R100",
   },
   {
-    icon: Shield,
+    icon: CircleDot,
     title: "XCLUSIVE Bald Cut",
     description:
       "Clipper chiskop (R60), Razor blade chiskop (R70)",
     price: "From R60",
   },
   {
-    icon: Zap,
+    icon: Smile,
     title: "XCLUSIVE Beard",
     description:
       "Beard shave (R20), Beard with dye (R50)",

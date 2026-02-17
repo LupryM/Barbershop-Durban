@@ -4,10 +4,16 @@ import { useRouter } from "next/navigation";
 import { CustomerDashboard } from "@/components/customer-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { BarberDashboard } from "@/components/barber-dashboard";
+import { Toaster } from "sonner";
+
+interface UserData {
+  name: string;
+  role: string;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("xclusiveUser");

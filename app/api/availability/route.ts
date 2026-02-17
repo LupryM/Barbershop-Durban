@@ -5,10 +5,6 @@ import { getSession } from '@/lib/auth';
 // GET - Get barber availability
 export async function GET(request: NextRequest) {
   try {
-    if (!db) {
-      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
-    }
-
     const { searchParams } = new URL(request.url);
     const barberId = searchParams.get('barberId');
     const date = searchParams.get('date');
@@ -40,10 +36,6 @@ export async function GET(request: NextRequest) {
 // POST - Add barber unavailability (time off, lunch, etc.)
 export async function POST(request: NextRequest) {
   try {
-    if (!db) {
-      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
-    }
-
     const { user } = await getSession();
     
     if (!user || (user.role !== 'barber' && user.role !== 'admin')) {
@@ -83,10 +75,6 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove availability record
 export async function DELETE(request: NextRequest) {
   try {
-    if (!db) {
-      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
-    }
-
     const { user } = await getSession();
     
     if (!user || (user.role !== 'barber' && user.role !== 'admin')) {

@@ -6,10 +6,6 @@ export async function GET(request: NextRequest) {
   try {
     await requireAuth(['admin']);
 
-    if (!db) {
-      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
-    }
-
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || 'week'; // day, week, month, year
 

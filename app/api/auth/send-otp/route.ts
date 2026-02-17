@@ -11,10 +11,6 @@ function sendSMS(phone: string, code: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!db) {
-      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
-    }
-
     const { phone } = await request.json();
 
     if (!phone) {

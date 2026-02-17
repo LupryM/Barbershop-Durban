@@ -7,7 +7,7 @@ export async function POST() {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get('session')?.value;
 
-    if (sessionId && db) {
+    if (sessionId) {
       // Delete session from database
       db.prepare('DELETE FROM sessions WHERE id = ?').run(sessionId);
     }

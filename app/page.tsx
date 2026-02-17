@@ -68,8 +68,8 @@ export default function App() {
             <a href="#location" className="hover:text-black transition-colors">
               Location
             </a>
-            <a href="/login" className="hover:text-black transition-colors">
-              Login
+            <a href="/dashboard" className="hover:text-black transition-colors">
+              My Bookings
             </a>
             <a
               href="#book"
@@ -118,7 +118,7 @@ export default function App() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="hover:text-black"
               >
-                Login
+                Login / Sign Up
               </a>
               <a
                 href="/dashboard"

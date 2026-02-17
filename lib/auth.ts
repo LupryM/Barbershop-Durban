@@ -15,7 +15,7 @@ export async function getSession(): Promise<{ user: User | null }> {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get('session')?.value;
 
-  if (!sessionId || !db) {
+  if (!sessionId) {
     return { user: null };
   }
 
@@ -43,7 +43,6 @@ export async function getSession(): Promise<{ user: User | null }> {
       }
     };
   } catch (error) {
-    console.error('[v0] Session error:', error);
     return { user: null };
   }
 }
