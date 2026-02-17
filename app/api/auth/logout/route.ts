@@ -1,18 +1,8 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import db from '@/lib/db';
 
 export async function POST() {
   try {
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get('session')?.value;
-
-    if (sessionId) {
-      // Delete session from database
-      db.prepare('DELETE FROM sessions WHERE id = ?').run(sessionId);
-    }
-
-    // Clear cookie
+    // Clear cookie (database disabled)
     const response = NextResponse.json({ success: true });
     response.cookies.delete('session');
 

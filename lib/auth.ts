@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers';
-import db from './db';
 
 export interface User {
   id: number;
@@ -19,32 +18,8 @@ export async function getSession(): Promise<{ user: User | null }> {
     return { user: null };
   }
 
-  try {
-    // Get session
-    const session = db.prepare(`
-      SELECT s.*, u.* FROM sessions s
-      JOIN users u ON s.user_id = u.id
-      WHERE s.id = ? AND s.expires_at > datetime('now')
-    `).get(sessionId) as any;
-
-    if (!session) {
-      return { user: null };
-    }
-
-    return {
-      user: {
-        id: session.user_id,
-        phone: session.phone,
-        name: session.name,
-        email: session.email,
-        role: session.role,
-        created_at: session.created_at,
-        last_login: session.last_login
-      }
-    };
-  } catch (error) {
-    return { user: null };
-  }
+  // Mock session - database disabled
+  return { user: null };
 }
 
 export async function requireAuth(allowedRoles?: string[]) {

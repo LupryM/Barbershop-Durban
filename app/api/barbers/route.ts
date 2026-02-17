@@ -1,22 +1,37 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
 
 export async function GET() {
   try {
-    const barbers = db.prepare(`
-      SELECT 
-        u.id,
-        u.name,
-        u.phone,
-        b.specialty,
-        b.experience,
-        b.image_url,
-        b.is_active
-      FROM users u
-      JOIN barbers b ON u.id = b.user_id
-      WHERE u.role = 'barber' AND b.is_active = 1
-      ORDER BY u.name
-    `).all();
+    // Return mock barbers data
+    const barbers = [
+      {
+        id: 1,
+        name: 'Thabo Mkhize',
+        phone: '+27821111111',
+        specialty: 'Master Barber',
+        experience: '10+ years',
+        image_url: '/placeholder.svg?height=300&width=300',
+        is_active: 1
+      },
+      {
+        id: 2,
+        name: 'Sipho Nkosi',
+        phone: '+27822222222',
+        specialty: 'Fade Specialist',
+        experience: '7+ years',
+        image_url: '/placeholder.svg?height=300&width=300',
+        is_active: 1
+      },
+      {
+        id: 3,
+        name: 'Mandla Dlamini',
+        phone: '+27823333333',
+        specialty: 'Beard Expert',
+        experience: '8+ years',
+        image_url: '/placeholder.svg?height=300&width=300',
+        is_active: 1
+      }
+    ];
 
     return NextResponse.json({ barbers });
   } catch (error) {
