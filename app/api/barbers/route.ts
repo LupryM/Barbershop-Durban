@@ -3,6 +3,10 @@ import db from '@/lib/db';
 
 export async function GET() {
   try {
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     const barbers = db.prepare(`
       SELECT 
         u.id,

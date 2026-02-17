@@ -1,14 +1,21 @@
 import Database from 'better-sqlite3';
 import { join } from 'path';
 
-const dbPath = join(process.cwd(), 'xclusive-barber.db');
-const db = new Database(dbPath);
+let db: Database.Database | null = null;
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
+// Only initialize database in development
+if (process.env.NODE_ENV === 'development') {
+  const dbPath = join(process.cwd(), 'xclusive-barber.db');
+  db = new Database(dbPath);
+  
+  // Enable foreign keys
+  db.pragma('foreign_keys = ON');
+}
 
 // Initialize database schema
 export function initDb() {
+  if (!db) return;
+  
   // Users table (customers and staff)
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (

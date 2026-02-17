@@ -5,6 +5,10 @@ import { requireAuth } from '@/lib/auth';
 // GET - Get all customers with their appointment history
 export async function GET(request: NextRequest) {
   try {
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     await requireAuth(['admin', 'barber']);
 
     const customers = db.prepare(`
@@ -41,6 +45,10 @@ export async function GET(request: NextRequest) {
 // PATCH - Update customer notes/preferences
 export async function PATCH(request: NextRequest) {
   try {
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     await requireAuth(['admin', 'barber']);
 
     const data = await request.json();

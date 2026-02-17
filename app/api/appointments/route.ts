@@ -11,6 +11,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const date = searchParams.get("date");
@@ -70,6 +74,10 @@ export async function GET(request: NextRequest) {
 // POST - Create appointment
 export async function POST(request: NextRequest) {
   try {
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     const data = await request.json();
     const {
       barber_id,

@@ -8,6 +8,10 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!db) {
+      return NextResponse.json({ error: 'Database not configured. Please set up a production database.' }, { status: 503 });
+    }
+
     await requireAuth(['admin', 'barber']);
 
     const params = await context.params;
