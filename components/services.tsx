@@ -4,30 +4,30 @@ import { Scissors, Zap, Shield, Sparkles } from "lucide-react";
 const serviceCategories = [
   {
     icon: Scissors,
-    title: "The Cut",
+    title: "XCLUSIVE Haircut",
     description:
-      "Signature consultation, precision haircut, wash, and styling.",
-    price: "R250",
-  },
-  {
-    icon: Zap,
-    title: "The Beard",
-    description: "Beard sculpting, line-up, and hot towel treatment.",
-    price: "R150",
-  },
-  {
-    icon: Shield,
-    title: "The Shave",
-    description:
-      "Traditional straight-razor shave with pre-shave oils and hot towels.",
-    price: "R200",
+      "Normal haircut (R100), Haircut with dye (R150), Full house with dye and fibre (R180)",
+    price: "From R100",
   },
   {
     icon: Sparkles,
-    title: "The Ritual",
+    title: "Hair Colouring",
+    description: "Black (R100), Blond (R100), White (R200)",
+    price: "From R100",
+  },
+  {
+    icon: Shield,
+    title: "XCLUSIVE Bald Cut",
     description:
-      "The ultimate experience: Haircut, beard, nose wax, and facial.",
-    price: "R500",
+      "Clipper chiskop (R60), Razor blade chiskop (R70)",
+    price: "From R60",
+  },
+  {
+    icon: Zap,
+    title: "XCLUSIVE Beard",
+    description:
+      "Beard shave (R20), Beard with dye (R50)",
+    price: "From R20",
   },
 ];
 
@@ -42,11 +42,11 @@ export function Services() {
           <div className="space-y-12">
             <div>
               <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">
-                Our Expertise
+                XCLUSIVE Services
               </span>
               <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
-                Premium grooming for <br />
-                the modern gentleman.
+                All types of XCLUSIVE <br />
+                cuts and styles.
               </h2>
             </div>
 
@@ -77,7 +77,7 @@ export function Services() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute bottom-10 left-10">
               <p className="text-white italic font-serif text-xl drop-shadow-md">
-                "Details define the man."
+                "XCLUSIVE PROMO: Cut 3 Haircuts get 1 FREE"
               </p>
             </div>
           </div>

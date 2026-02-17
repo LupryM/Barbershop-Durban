@@ -5,13 +5,13 @@ import { MapPin, Phone, Clock, Mail, Navigation } from 'lucide-react';
 
 export function LocationMap() {
   const location = {
-    address: "123 West Street, Durban Central",
+    address: "121 Helen Joseph Rd, Bulwer",
     city: "Durban",
-    province: "KwaZulu-Natal",
+    province: "Davenport",
     postalCode: "4001",
     country: "South Africa",
-    phone: "+27 (0) 82 123 4567",
-    email: "info@xclusivebarber.co.za",
+    phone: "+27 67 886 4334",
+    email: "ebarbershop988@gmail.com",
     lat: -29.8587,
     lng: 31.0218,
   };
@@ -27,8 +27,8 @@ export function LocationMap() {
             Find Us
           </span>
           <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
-            Visit our barbershop <br />
-            in Durban.
+            Visit XCLUSIVE BARBER <br />
+            in Davenport, Durban.
           </h2>
         </div>
 

@@ -17,12 +17,10 @@ export function Hero() {
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 tracking-tight leading-[0.95] text-balance">
-          Where Style Meets Excellence
+          XCLUSIVE BARBER
         </h1>
         <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed text-pretty">
-          Durban's premier destination for precision cuts, expert beard
-          grooming, and timeless style. Experience the art of barbering
-          redefined.
+          Davenport - All types of XCLUSIVE haircuts, hair colouring, bald cuts, beard services, and hectic designs. Experience professional grooming at its finest.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
