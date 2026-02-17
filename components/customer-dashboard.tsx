@@ -113,7 +113,7 @@ export function CustomerDashboard({ user }: { user: User }) {
         <div className="mb-12">
           <button
             onClick={() => router.push('/#book')}
-            className="border border-white/20 text-white px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:bg-white hover:text-black transition-all flex items-center gap-3"
+            className="bg-accent text-accent-foreground px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all flex items-center gap-3 shadow-lg"
           >
             <Plus className="w-4 h-4" />
             Book New Appointment
@@ -137,7 +137,7 @@ export function CustomerDashboard({ user }: { user: User }) {
                   <p className="text-white/40 text-sm mb-8">Book your next grooming session today</p>
                   <button
                     onClick={() => router.push('/#book')}
-                    className="border border-white/20 text-white px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:bg-white hover:text-black transition-all"
+                    className="bg-accent text-accent-foreground px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all shadow-lg"
                   >
                     Book Now
                   </button>
@@ -153,7 +153,7 @@ export function CustomerDashboard({ user }: { user: User }) {
                         </div>
                         <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-medium ${
                           appointment.status === 'confirmed' 
-                            ? 'bg-white/10 text-white/80' 
+                            ? 'bg-accent text-accent-foreground' 
                             : 'bg-white/5 text-white/40'
                         }`}>
                           {appointment.status}

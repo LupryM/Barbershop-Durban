@@ -94,7 +94,7 @@ export function BarberDashboard({ user }: { user: User }) {
                     <p className="text-xs text-white/30">{appointment.customer_phone}</p>
                   </div>
                   <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-medium ${
-                    appointment.status === 'confirmed' ? 'bg-white/10 text-white/80' : 'bg-white/5 text-white/40'
+                    appointment.status === 'confirmed' ? 'bg-accent text-accent-foreground' : 'bg-white/5 text-white/40'
                   }`}>
                     {appointment.status}
                   </span>

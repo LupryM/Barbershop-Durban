@@ -27,13 +27,13 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
             href="#book"
-            className="px-10 py-4 bg-white text-black text-sm uppercase tracking-widest font-medium hover:bg-white/90 transition-all rounded-sm"
+            className="px-10 py-4 bg-accent text-accent-foreground text-sm uppercase tracking-widest font-medium hover:opacity-90 transition-all rounded-sm shadow-lg"
           >
             Book Appointment
           </a>
           <a
             href="#services"
-            className="px-10 py-4 border border-white/30 text-white text-sm uppercase tracking-widest font-medium hover:bg-white hover:text-black transition-all rounded-sm"
+            className="px-10 py-4 border-2 border-white/30 text-white text-sm uppercase tracking-widest font-medium hover:bg-white hover:text-black transition-all rounded-sm"
           >
             Our Services
           </a>

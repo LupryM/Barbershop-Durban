@@ -24,19 +24,19 @@ export function Footer() {
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
               >
                 <Twitter className="w-4 h-4" />
               </a>

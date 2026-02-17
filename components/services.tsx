@@ -53,15 +53,15 @@ export function Services() {
             <div className="grid sm:grid-cols-2 gap-x-12 gap-y-16">
               {serviceCategories.map((service, index) => (
                 <div key={index} className="space-y-4 group">
-                  <div className="w-12 h-12 flex items-center justify-center border border-black/10 rounded-full group-hover:bg-black group-hover:text-white transition-all duration-300">
-                    <service.icon className="w-5 h-5 text-black/60 group-hover:text-white" />
+                  <div className="w-12 h-12 flex items-center justify-center border-2 border-black/10 rounded-full group-hover:bg-accent group-hover:border-accent group-hover:text-accent-foreground transition-all duration-300">
+                    <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-light">{service.title}</h3>
+                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">{service.title}</h3>
                     <p className="text-sm text-black/50 leading-relaxed">
                       {service.description}
                     </p>
-                    <p className="text-sm font-medium pt-2">{service.price}</p>
+                    <p className="text-sm font-medium pt-2 text-accent">{service.price}</p>
                   </div>
                 </div>
               ))}

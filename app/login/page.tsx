@@ -113,7 +113,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-3.5 rounded-lg font-medium text-sm uppercase tracking-widest hover:bg-black/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg"
+              className="w-full bg-accent text-accent-foreground py-3.5 rounded-lg font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>

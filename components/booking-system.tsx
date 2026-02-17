@@ -165,7 +165,7 @@ export function BookingSystem() {
               <div
                 key={i}
                 className={`flex-1 h-1.5 transition-colors duration-500 ${
-                  step >= i ? "bg-black" : "bg-black/5"
+                  step >= i ? "bg-accent" : "bg-black/5"
                 }`}
               />
             ))}
@@ -192,9 +192,9 @@ export function BookingSystem() {
                           setSelectedService(service);
                           nextStep();
                         }}
-                        className={`flex items-center justify-between p-6 rounded-lg border text-left transition-all hover:border-black group ${
+                        className={`flex items-center justify-between p-6 rounded-lg border-2 text-left transition-all hover:border-accent group ${
                           selectedService?.id === service.id
-                            ? "border-black bg-black/5"
+                            ? "border-accent bg-accent/5"
                             : "border-black/10"
                         }`}
                       >
@@ -247,9 +247,9 @@ export function BookingSystem() {
                           setSelectedBarber(barber);
                           nextStep();
                         }}
-                        className={`flex flex-col p-6 rounded-lg border text-center transition-all hover:border-black group ${
+                        className={`flex flex-col p-6 rounded-lg border-2 text-center transition-all hover:border-accent group ${
                           selectedBarber?.id === barber.id
-                            ? "border-black bg-black/5"
+                            ? "border-accent bg-accent/5"
                             : "border-black/10"
                         }`}
                       >
@@ -316,10 +316,10 @@ export function BookingSystem() {
                           <button
                             key={time}
                             onClick={() => setSelectedTime(time)}
-                            className={`p-3 text-sm rounded border transition-all ${
+                            className={`p-3 text-sm rounded border-2 transition-all ${
                               selectedTime === time
-                                ? "bg-black text-white border-black"
-                                : "border-black/10 hover:border-black text-black"
+                                ? "bg-accent text-accent-foreground border-accent"
+                                : "border-black/10 hover:border-accent text-black"
                             }`}
                           >
                             {time}
@@ -329,7 +329,7 @@ export function BookingSystem() {
                       <button
                         disabled={!selectedTime}
                         onClick={nextStep}
-                        className="w-full bg-black text-white py-4 rounded-lg mt-8 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-black/90"
+                        className="w-full bg-accent text-accent-foreground py-4 rounded-lg mt-8 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90 font-medium"
                       >
                         Continue
                       </button>
@@ -448,7 +448,7 @@ export function BookingSystem() {
 
                     <button
                       type="submit"
-                      className="w-full bg-black text-white py-4 rounded-lg font-medium hover:bg-black/90 transition-all shadow-lg"
+                      className="w-full bg-accent text-accent-foreground py-4 rounded-lg font-medium hover:opacity-90 transition-all shadow-lg"
                     >
                       Confirm Appointment
                     </button>
@@ -463,7 +463,7 @@ export function BookingSystem() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12 space-y-6"
                 >
-                  <div className="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-20 h-20 bg-accent text-accent-foreground rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <CheckCircle className="w-10 h-10" />
                   </div>
                   <h3 className="text-3xl font-light text-black">

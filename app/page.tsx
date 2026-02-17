@@ -73,7 +73,7 @@ export default function App() {
             </a>
             <a
               href="#book"
-              className="px-6 py-2 border border-black/10 text-black hover:bg-black hover:text-white transition-all"
+              className="px-6 py-2 bg-accent text-accent-foreground hover:opacity-90 transition-all font-medium"
             >
               Book Now
             </a>

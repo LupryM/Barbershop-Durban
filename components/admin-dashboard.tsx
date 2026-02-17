@@ -133,7 +133,7 @@ export function AdminDashboard({ user }: { user: User }) {
               onClick={() => setSelectedTab(tab.id)}
               className={`py-4 text-xs uppercase tracking-widest transition-colors border-b-2 ${
                 selectedTab === tab.id
-                  ? 'border-white text-white'
+                  ? 'border-accent text-white'
                   : 'border-transparent text-white/30 hover:text-white/60'
               }`}
             >
@@ -199,7 +199,7 @@ export function AdminDashboard({ user }: { user: User }) {
                       key={v}
                       onClick={() => setView(v)}
                       className={`px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
-                        view === v ? 'bg-white text-black' : 'border border-white/10 hover:bg-white/5'
+                        view === v ? 'bg-accent text-accent-foreground' : 'border border-white/10 hover:bg-white/5'
                       }`}
                     >
                       {v}
@@ -347,7 +347,7 @@ function AnalyticsTab() {
             key={p}
             onClick={() => setPeriod(p)}
             className={`px-4 py-2 text-xs uppercase tracking-widest transition-colors capitalize ${
-              period === p ? 'bg-white text-black' : 'border border-white/10 hover:bg-white/5'
+              period === p ? 'bg-accent text-accent-foreground' : 'border border-white/10 hover:bg-white/5'
             }`}
           >
             {p}
@@ -387,7 +387,7 @@ function AnalyticsTab() {
               </div>
               <div className="w-32 bg-white/5 h-1.5">
                 <div
-                  className="bg-white/40 h-1.5"
+                  className="bg-accent h-1.5"
                   style={{ width: `${(service.bookings / (analytics.popular_services[0]?.bookings || 1)) * 100}%` }}
                 />
               </div>
