@@ -18,24 +18,25 @@ export function Footer() {
               XCLUSIVE BARBER
             </h3>
             <p className="text-sm text-black/50 leading-relaxed max-w-xs">
-              Davenport's barbershop for all types of XCLUSIVE haircuts, hair colouring, bald cuts, beard services, and hectic designs.
+              Durban's premier barbershop delivering exceptional grooming
+              experiences through precision, style, and unmatched expertise.
             </p>
             <div className="flex gap-4">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
+                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
               >
                 <Twitter className="w-4 h-4" />
               </a>
@@ -97,17 +98,17 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  121 Helen Joseph Rd, Bulwer, <br />
-                  Davenport, Durban, 4001
+                  Durban, <br />
+                  KwaZulu-Natal, South Africa
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+27 67 886 4334</span>
+                <span>+27 (0) 82 123 4567</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>ebarbershop988@gmail.com</span>
+                <span>info@xclusivebarber.co.za</span>
               </li>
             </ul>
           </div>
@@ -135,7 +136,7 @@ export function Footer() {
 
         <div className="pt-12 border-t border-black/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-black/30">
           <p>
-            © 2025 XCLUSIVE BARBER - Davenport, Durban. All Rights Reserved.
+            © 2025 Xclusive Barber - Durban, South Africa. All Rights Reserved.
           </p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-black/60">
@@ -153,10 +154,10 @@ export function Footer() {
 
 export function Gallery() {
   const images = [
-    "https://images.unsplash.com/photo-1630435664010-20cbd1d7bb6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzaGFycCUyMG1lbiUyMGhhaXJjdXQlMjBtaW5pbWFsaXN0fGVufDF8fHx8MTc3MTI3MjkxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1764670687832-6dc25615fdf3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYXJiZXIlMjB0b29scyUyMGRhcmslMjBhZXN0aGV0aWN8ZW58MXx8fHwxNzcxMjcyOTE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1610475680335-dafab5475150?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBiYXJiZXJzaG9wJTIwaW50ZXJpb3IlMjBtaW5pbWFsaXN0fGVufDF8fHx8MTc3MTI3MjkxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    "https://images.unsplash.com/photo-1747832512459-5566e6d0ee5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBiYXJiZXIlMjBhdCUyMHdvcmt8ZW58MXx8fHwxNzcxMjcyOTE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "/haircuts/braids.webp",
+    "/haircuts/fade.webp",
+    "/haircuts/kid.webp",
+    "/haircuts/rashford.webp",
   ];
 
   return (
@@ -167,7 +168,7 @@ export function Gallery() {
             <img
               src={src}
               alt={`Gallery ${idx}`}
-              className="w-full h-full object-cover grayscale hover:grayscale-0 hover:scale-105 transition-all duration-700 cursor-pointer"
+              className="w-full h-full object-cover hover:scale-105 transition-all duration-700 cursor-pointer"
             />
           </div>
         ))}

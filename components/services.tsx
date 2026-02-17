@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Scissors, Paintbrush, CircleDot, Smile } from "lucide-react";
 
 const serviceCategories = [
@@ -18,20 +18,19 @@ const serviceCategories = [
   {
     icon: CircleDot,
     title: "XCLUSIVE Bald Cut",
-    description:
-      "Clipper chiskop (R60), Razor blade chiskop (R70)",
+    description: "Clipper chiskop (R60), Razor blade chiskop (R70)",
     price: "From R60",
   },
   {
     icon: Smile,
     title: "XCLUSIVE Beard",
-    description:
-      "Beard shave (R20), Beard with dye (R50)",
+    description: "Beard shave (R20), Beard with dye (R50)",
     price: "From R20",
   },
 ];
 
 export function Services() {
+  const [showModal, setShowModal] = useState(false);
   return (
     <section
       id="services"
@@ -57,11 +56,15 @@ export function Services() {
                     <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">{service.title}</h3>
+                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">
+                      {service.title}
+                    </h3>
                     <p className="text-sm text-black/50 leading-relaxed">
                       {service.description}
                     </p>
-                    <p className="text-sm font-medium pt-2 text-accent">{service.price}</p>
+                    <p className="text-sm font-medium pt-2 text-accent">
+                      {service.price}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -70,9 +73,10 @@ export function Services() {
 
           <div className="relative aspect-[4/5] overflow-hidden rounded-sm shadow-2xl">
             <img
-              src="https://images.unsplash.com/photo-1747832512459-5566e6d0ee5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBiYXJiZXIlMjBhdCUyMHdvcmt8ZW58MXx8fHwxNzcxMjcyOTE3fDA&ixlib=rb-4.1.0&q=80&w=1080"
+              src="/haircuts/taper.webp"
               alt="Professional Barber"
-              className="w-full h-full object-cover scale-110 grayscale hover:grayscale-0 transition-all duration-1000"
+              className="w-full h-full object-cover scale-110 transition-all duration-1000 cursor-pointer"
+              onClick={() => setShowModal(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             <div className="absolute bottom-10 left-10">
@@ -80,6 +84,26 @@ export function Services() {
                 "XCLUSIVE PROMO: Cut 3 Haircuts get 1 FREE"
               </p>
             </div>
+            {showModal && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                onClick={() => setShowModal(false)}
+              >
+                <img
+                  src="/haircuts/taper.webp"
+                  alt="Professional Barber Enlarged"
+                  className="max-h-[90vh] max-w-[90vw] rounded shadow-2xl border-4 border-white"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <button
+                  className="absolute top-6 right-6 text-white text-3xl font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/80 transition"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
