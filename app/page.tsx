@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { Menu, X } from "lucide-react";
 import { Hero } from "@/components/hero";
+import { WelcomeTitle, Description } from "@/components/welcome";
 import { Services } from "@/components/services";
 import { Gallery, Footer } from "@/components/gallery-and-footer";
 import { LocationMap } from "@/components/location-map";
@@ -147,6 +148,12 @@ export default function App() {
 
       <main>
         <Hero />
+        <section className="py-12 md:py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col gap-8">
+            <WelcomeTitle />
+            <Description />
+          </div>
+        </section>
         <Gallery />
         <Services />
         <LocationMap />
