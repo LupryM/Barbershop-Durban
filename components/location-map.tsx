@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { MapPin, Phone, Clock, Mail, Navigation } from 'lucide-react';
+import React from "react";
+import { MapPin, Phone, Clock, Mail, Navigation } from "lucide-react";
 
 export function LocationMap() {
   const location = {
@@ -10,8 +10,8 @@ export function LocationMap() {
     province: "Davenport",
     postalCode: "4001",
     country: "South Africa",
-    phone: "+27 67 886 4334",
-    email: "ebarbershop988@gmail.com",
+    phone: "068 425 0060",
+    email: "ebarbershop998@gmail.com",
     lat: -29.8587,
     lng: 31.0218,
   };
@@ -53,13 +53,17 @@ export function LocationMap() {
             <div className="border border-white/10 p-6 flex items-start gap-4">
               <MapPin className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-semibold font-montserrat">Address</h3>
+                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-semibold font-montserrat">
+                  Address
+                </h3>
                 <p className="text-sm text-white/80 leading-relaxed font-poppins">
-                  {location.address}<br />
-                  {location.city}, {location.province}<br />
+                  {location.address}
+                  <br />
+                  {location.city}, {location.province}
+                  <br />
                   {location.postalCode}
                 </p>
-                <a 
+                <a
                   href={directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -75,11 +79,19 @@ export function LocationMap() {
             <div className="border border-white/10 p-6 flex items-start gap-4">
               <Phone className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-medium">Contact</h3>
-                <a href={`tel:${location.phone}`} className="block text-sm text-white/60 hover:text-white transition-colors">
+                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-medium">
+                  Contact
+                </h3>
+                <a
+                  href={`tel:${location.phone}`}
+                  className="block text-sm text-white/60 hover:text-white transition-colors"
+                >
                   {location.phone}
                 </a>
-                <a href={`mailto:${location.email}`} className="block text-sm text-white/60 hover:text-white transition-colors mt-1">
+                <a
+                  href={`mailto:${location.email}`}
+                  className="block text-sm text-white/60 hover:text-white transition-colors mt-1"
+                >
                   {location.email}
                 </a>
               </div>
@@ -89,19 +101,17 @@ export function LocationMap() {
             <div className="border border-white/10 p-6 flex items-start gap-4">
               <Clock className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-medium">Hours</h3>
+                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-medium">
+                  Hours
+                </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/40">Mon - Fri</span>
+                    <span className="text-white/40">Mon - Sat</span>
                     <span className="text-white/60">09:00 - 19:00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-white/40">Saturday</span>
-                    <span className="text-white/60">10:00 - 17:00</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-white/40">Sunday</span>
-                    <span className="text-white/30">Closed</span>
+                    <span className="text-white/60">09:00 - 15:00</span>
                   </div>
                 </div>
               </div>

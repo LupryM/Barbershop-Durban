@@ -111,7 +111,7 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-white/90 font-poppins leading-6">
               <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>
                   121 Helen Joseph Rd, Bulwer
                   <br />
@@ -119,12 +119,12 @@ export function Footer() {
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+27 67 886 4334</span>
+                <Phone className="w-4 h-4 shrink-0" />
+                <span>068 425 0060</span>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>ebarbershop988@gmail.com</span>
+                <Mail className="w-4 h-4 shrink-0" />
+                <span>ebarbershop998@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -135,16 +135,12 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-white/90 font-poppins leading-6">
               <li className="flex justify-between">
-                <span>Mon - Fri</span>
+                <span>Mon - Sat</span>
                 <span>09:00 - 19:00</span>
               </li>
               <li className="flex justify-between">
-                <span>Saturday</span>
-                <span>10:00 - 17:00</span>
-              </li>
-              <li className="flex justify-between text-white/60">
                 <span>Sunday</span>
-                <span>Closed</span>
+                <span>09:00 - 15:00</span>
               </li>
             </ul>
           </div>

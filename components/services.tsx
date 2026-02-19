@@ -64,46 +64,45 @@ export function Services() {
               ))}
             </div>
 
+            <div className="relative aspect-[4/5] overflow-hidden rounded-sm shadow-2xl mb-8">
+              <img
+                src="/haircuts/taper.webp"
+                alt="Professional Barber"
+                className="w-full h-full object-cover scale-110 transition-all duration-1000 cursor-pointer"
+                onClick={() => setShowModal(true)}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="absolute bottom-10 left-10">
+                <p className="text-white italic font-serif text-xl drop-shadow-md">
+                  "XCLUSIVE PROMO: Cut 3 Haircuts get 1 FREE"
+                </p>
+              </div>
+              {showModal && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                  onClick={() => setShowModal(false)}
+                >
+                  <img
+                    src="/haircuts/taper.webp"
+                    alt="Professional Barber Enlarged"
+                    className="max-h-[90vh] max-w-[90vw] rounded shadow-2xl border-4 border-white"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <button
+                    className="absolute top-6 right-6 text-white text-3xl font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/80 transition"
+                    onClick={() => setShowModal(false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </div>
+              )}
+            </div>
             <Link href="/services">
-              <button className="mt-8 px-10 py-4 bg-accent text-white font-bold hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
-                View Prices
+              <button className="px-10 py-4 bg-accent text-white font-bold hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
+                Book Now
               </button>
             </Link>
-          </div>
-
-          <div className="relative aspect-[4/5] overflow-hidden rounded-sm shadow-2xl">
-            <img
-              src="/haircuts/taper.webp"
-              alt="Professional Barber"
-              className="w-full h-full object-cover scale-110 transition-all duration-1000 cursor-pointer"
-              onClick={() => setShowModal(true)}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            <div className="absolute bottom-10 left-10">
-              <p className="text-white italic font-serif text-xl drop-shadow-md">
-                "XCLUSIVE PROMO: Cut 3 Haircuts get 1 FREE"
-              </p>
-            </div>
-            {showModal && (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-                onClick={() => setShowModal(false)}
-              >
-                <img
-                  src="/haircuts/taper.webp"
-                  alt="Professional Barber Enlarged"
-                  className="max-h-[90vh] max-w-[90vw] rounded shadow-2xl border-4 border-white"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <button
-                  className="absolute top-6 right-6 text-white text-3xl font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/80 transition"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
