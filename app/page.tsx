@@ -8,6 +8,7 @@ import { WelcomeTitle, Description } from "@/components/welcome";
 import { Services } from "@/components/services";
 import { Gallery, Footer } from "@/components/gallery-and-footer";
 import { LocationMap } from "@/components/location-map";
+import { Newsletter } from "@/components/newsletter";
 
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -157,6 +158,7 @@ export default function App() {
         <Gallery />
         <Services />
         <LocationMap />
+        <Newsletter />
       </main>
 
       <Footer />
