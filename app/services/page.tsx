@@ -22,8 +22,8 @@ export default function ServicesPage() {
         </div>
       </header>
 
-      {/* Booking System */}
-      <BookingSystem />
+      {/* Booking System Only */}
+      <BookingSystem hideTitle={true} />
     </div>
   );
 }

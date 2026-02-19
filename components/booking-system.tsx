@@ -137,7 +137,7 @@ const timeSlots = [
   "06:00 PM",
 ];
 
-export function BookingSystem() {
+export function BookingSystem({ hideTitle = false }) {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -208,14 +208,16 @@ export function BookingSystem() {
         }
       `}</style>
       <div className="max-w-4xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-semibold mb-4 tracking-tight text-black font-montserrat">
-            Book Your Appointment
-          </h2>
-          <p className="text-black/60 max-w-lg mx-auto font-open-sans">
-            Select your preferred service and time. We'll handle the rest.
-          </p>
-        </div>
+        {!hideTitle && (
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold mb-4 tracking-tight text-black font-montserrat">
+              Book Your Appointment
+            </h2>
+            <p className="text-black/60 max-w-lg mx-auto font-open-sans">
+              Select your preferred service and time. We'll handle the rest.
+            </p>
+          </div>
+        )}
 
         <div className="bg-white border border-black/10 rounded-xl overflow-hidden shadow-sm">
           {/* Progress Bar */}
