@@ -113,8 +113,8 @@ export function CustomerDashboard({ user }: { user: UserData }) {
               Your Appointments
             </h1>
             <button
-              onClick={() => router.push('/#book')}
-              className="bg-accent text-accent-foreground px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all flex items-center gap-3 w-fit"
+              onClick={() => router.push('/services')}
+              className="bg-accent text-accent-foreground px-8 py-4 font-semibold hover:opacity-90 transition-all flex items-center gap-3 w-fit font-montserrat"
             >
               <Plus className="w-4 h-4" />
               Book New Appointment
@@ -138,8 +138,8 @@ export function CustomerDashboard({ user }: { user: UserData }) {
                   <h3 className="text-xl font-light mb-2">No upcoming appointments</h3>
                   <p className="text-black/40 text-sm mb-8">Book your next grooming session today</p>
                   <button
-                    onClick={() => router.push('/#book')}
-                    className="bg-accent text-accent-foreground px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all"
+                    onClick={() => router.push('/services')}
+                    className="bg-accent text-accent-foreground px-8 py-4 font-semibold hover:opacity-90 transition-all font-montserrat"
                   >
                     Book Now
                   </button>
@@ -176,7 +176,7 @@ export function CustomerDashboard({ user }: { user: UserData }) {
 
                       <div className="flex gap-3 pt-6 border-t border-black/5">
                         <button
-                          onClick={() => router.push('/#book')}
+                          onClick={() => router.push('/services')}
                           className="flex-1 border-2 border-black/10 text-black/60 px-4 py-2 text-xs uppercase tracking-widest hover:border-accent hover:text-accent transition-all flex items-center justify-center gap-2"
                         >
                           <Edit2 className="w-3 h-3" /> Reschedule
