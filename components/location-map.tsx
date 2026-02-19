@@ -109,7 +109,7 @@ export function LocationMap() {
 
             {/* CTA */}
             <a
-              href="#book"
+              href="/services"
               className="block text-center px-8 py-4 bg-accent text-accent-foreground text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all shadow-lg"
             >
               Book Your Appointment

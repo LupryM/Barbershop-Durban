@@ -24,7 +24,7 @@ export function Hero() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
-            href="#book"
+            href="/services"
             className="px-10 py-4 bg-accent text-accent-foreground text-sm uppercase tracking-widest font-bold hover:opacity-90 transition-all rounded-full shadow-lg font-poppins"
           >
             Book Appointment

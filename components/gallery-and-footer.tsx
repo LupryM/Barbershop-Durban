@@ -70,7 +70,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#book" className="hover:text-black transition-colors">
+                <a href="/services" className="hover:text-black transition-colors">
                   Book Online
                 </a>
               </li>
