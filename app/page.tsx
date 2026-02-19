@@ -88,10 +88,10 @@ export default function App() {
         {mobileMenuOpen && (
           <>
             <div 
-              className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+              className="fixed inset-0 bg-black/50 z-[100] md:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-accent z-[70] md:hidden animate-in slide-in-from-right duration-300 shadow-2xl">
+            <div className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-accent z-[101] md:hidden animate-in slide-in-from-right duration-300 shadow-2xl">
               <button
                 className="absolute top-6 right-6 text-white p-2"
                 onClick={() => setMobileMenuOpen(false)}
