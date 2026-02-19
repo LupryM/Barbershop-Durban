@@ -5,10 +5,8 @@ import { Toaster } from "sonner";
 import { Menu, X } from "lucide-react";
 import { Hero } from "@/components/hero";
 import { Services } from "@/components/services";
-import { BookingSystem } from "@/components/booking-system";
 import { Gallery, Footer } from "@/components/gallery-and-footer";
 import { LocationMap } from "@/components/location-map";
-import "react-day-picker/dist/style.css";
 
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,7 +66,7 @@ export default function App() {
               My Bookings
             </a>
             <a
-              href="#book"
+              href="/services"
               className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide rounded-full font-poppins"
             >
               BOOK NOW
@@ -135,7 +133,7 @@ export default function App() {
                   My Bookings
                 </a>
                 <a
-                  href="#book"
+                  href="/services"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-white font-bold mt-4"
                 >
@@ -150,7 +148,6 @@ export default function App() {
       <main>
         <Hero />
         <Gallery />
-        <BookingSystem />
         <Services />
         <LocationMap />
       </main>

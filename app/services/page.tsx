@@ -3,6 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Scissors, Paintbrush, CircleDot, Smile, Sparkles } from "lucide-react";
+import { BookingSystem } from "@/components/booking-system";
+import { Toaster } from "sonner";
+import "react-day-picker/dist/style.css";
 
 const services = [
   {
@@ -106,6 +109,8 @@ const services = [
 export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-white">
+      <Toaster position="top-center" expand={true} richColors />
+      
       {/* Header */}
       <header className="bg-black text-white py-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
@@ -117,7 +122,7 @@ export default function ServicesPage() {
       </header>
 
       {/* Services List */}
-      <main className="py-16">
+      <section className="py-16 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-12 text-center">
             <h2 className="text-4xl md:text-5xl font-semibold mb-4 font-montserrat text-black">
@@ -156,17 +161,11 @@ export default function ServicesPage() {
               </div>
             ))}
           </div>
-
-          <div className="mt-12 text-center">
-            <Link
-              href="/#book"
-              className="inline-block px-10 py-4 bg-accent text-white font-bold rounded-full hover:opacity-90 transition-all font-poppins"
-            >
-              BOOK NOW
-            </Link>
-          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Booking System */}
+      <BookingSystem />
     </div>
   );
 }
