@@ -30,8 +30,8 @@ export default function App() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/90 backdrop-blur-md py-3 border-b border-black/5 shadow-sm"
-            : "bg-transparent py-6"
+            ? "bg-black/95 backdrop-blur-md py-3 shadow-lg"
+            : "bg-black py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -45,9 +45,7 @@ export default function App() {
               />
             </div>
             <span
-              className={`text-xl md:text-2xl font-light tracking-tighter transition-colors ${
-                isScrolled ? "text-black" : "text-black"
-              }`}
+              className="text-xl md:text-2xl font-semibold tracking-tight transition-colors text-white font-montserrat"
             >
               XCLUSIVE BARBER
             </span>
@@ -55,33 +53,31 @@ export default function App() {
 
           {/* Desktop Nav */}
           <div
-            className={`hidden md:flex items-center gap-8 text-[11px] uppercase tracking-[0.2em] font-medium transition-colors ${
-              isScrolled ? "text-black/60" : "text-black/60"
-            }`}
+            className="hidden md:flex items-center gap-8 text-[17px] font-semibold transition-colors text-white font-montserrat"
           >
-            <a href="/" className="hover:text-black transition-colors">
+            <a href="/" className="hover:text-neutral-400 transition-colors">
               Home
             </a>
-            <a href="#services" className="hover:text-black transition-colors">
+            <a href="#services" className="hover:text-neutral-400 transition-colors">
               Services
             </a>
-            <a href="#location" className="hover:text-black transition-colors">
+            <a href="#location" className="hover:text-neutral-400 transition-colors">
               Location
             </a>
-            <a href="/dashboard" className="hover:text-black transition-colors">
+            <a href="/dashboard" className="hover:text-neutral-400 transition-colors">
               My Bookings
             </a>
             <a
               href="#book"
-              className="px-6 py-2 bg-accent text-accent-foreground hover:opacity-90 transition-all font-medium"
+              className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide rounded-full font-poppins"
             >
-              Book Now
+              BOOK NOW
             </a>
           </div>
 
           {/* Mobile Toggle */}
           <button
-            className="md:hidden p-2 text-black"
+            className="md:hidden p-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X /> : <Menu />}
@@ -90,47 +86,47 @@ export default function App() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white border-b border-black/5 md:hidden animate-in slide-in-from-top duration-300 shadow-xl">
-            <div className="p-6 flex flex-col gap-6 text-xs uppercase tracking-widest font-medium text-black/60">
+          <div className="absolute top-full left-0 right-0 bg-accent md:hidden animate-in slide-in-from-top duration-300 shadow-xl">
+            <div className="p-6 flex flex-col gap-6 text-[17px] font-semibold text-white font-montserrat">
               <a
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-black"
+                className="hover:text-neutral-300"
               >
                 Home
               </a>
               <a
                 href="#services"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-black"
+                className="hover:text-neutral-300"
               >
                 Services
               </a>
               <a
                 href="#location"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-black"
+                className="hover:text-neutral-300"
               >
                 Location
               </a>
               <a
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-black"
+                className="hover:text-neutral-300"
               >
                 Login / Sign Up
               </a>
               <a
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-black"
+                className="hover:text-neutral-300"
               >
                 My Bookings
               </a>
               <a
                 href="#book"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-black font-bold"
+                className="text-white font-bold"
               >
                 Book Appointment
               </a>

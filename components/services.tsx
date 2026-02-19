@@ -40,10 +40,10 @@ export function Services() {
         <div className="grid lg:grid-cols-2 gap-24 items-center">
           <div className="space-y-12">
             <div>
-              <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">
+              <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block font-montserrat">
                 XCLUSIVE Services
               </span>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
+              <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat">
                 All types of XCLUSIVE <br />
                 cuts and styles.
               </h2>
@@ -56,13 +56,13 @@ export function Services() {
                     <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">
+                    <h3 className="text-xl font-semibold group-hover:text-accent transition-colors duration-300 font-montserrat">
                       {service.title}
                     </h3>
-                    <p className="text-sm text-black/50 leading-relaxed">
+                    <p className="text-sm text-black/60 leading-relaxed font-open-sans">
                       {service.description}
                     </p>
-                    <p className="text-sm font-medium pt-2 text-accent">
+                    <p className="text-sm font-semibold pt-2 text-accent font-montserrat">
                       {service.price}
                     </p>
                   </div>

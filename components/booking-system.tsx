@@ -212,10 +212,10 @@ export function BookingSystem() {
       `}</style>
       <div className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-light mb-4 tracking-tight text-black">
+          <h2 className="text-4xl font-semibold mb-4 tracking-tight text-black font-montserrat">
             Book Your Appointment
           </h2>
-          <p className="text-black/50 max-w-lg mx-auto">
+          <p className="text-black/60 max-w-lg mx-auto font-open-sans">
             Select your preferred service and time. We'll handle the rest.
           </p>
         </div>
@@ -243,7 +243,7 @@ export function BookingSystem() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h3 className="text-2xl font-light mb-8 text-black">
+                  <h3 className="text-2xl font-semibold mb-8 text-black font-montserrat">
                     Select Service
                   </h3>
                   <div className="grid gap-4">

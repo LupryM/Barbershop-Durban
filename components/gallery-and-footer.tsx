@@ -10,44 +10,44 @@ import {
 
 export function Footer() {
   return (
-    <footer className="bg-neutral-50 text-black pt-24 pb-12 border-t border-black/5">
+    <footer className="bg-accent text-white pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
-          <div className="space-y-6">
-            <h3 className="text-2xl font-light tracking-tighter">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold tracking-tight font-montserrat">
               XCLUSIVE BARBER
             </h3>
-            <p className="text-sm text-black/50 leading-relaxed max-w-xs">
-              Durban's premier barbershop delivering exceptional grooming
+            <p className="text-sm text-white/90 leading-6 max-w-xs font-poppins">
+              Gentlemen Groomers - The Barber Cartel. Durban's premier barbershop delivering exceptional grooming
               experiences through precision, style, and unmatched expertise.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-lg bg-black flex items-center justify-center hover:bg-white hover:text-black transition-all"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-lg bg-black flex items-center justify-center hover:bg-white hover:text-black transition-all"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                className="w-10 h-10 rounded-lg bg-black flex items-center justify-center hover:bg-white hover:text-black transition-all"
               >
                 <Twitter className="w-4 h-4" />
               </a>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h4 className="text-xs uppercase tracking-widest text-black/40 font-medium">
-              Quick Links
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-white font-montserrat">
+              Service
             </h4>
-            <ul className="space-y-4 text-sm text-black/60">
+            <ul className="space-y-2 text-sm text-white/90 font-poppins leading-6">
               <li>
                 <a href="/" className="hover:text-black transition-colors">
                   Home
@@ -90,34 +90,34 @@ export function Footer() {
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <h4 className="text-xs uppercase tracking-widest text-black/40 font-medium">
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-white font-montserrat">
               Contact
             </h4>
-            <ul className="space-y-4 text-sm text-black/60">
-              <li className="flex items-start gap-3">
+            <ul className="space-y-2 text-sm text-white/90 font-poppins leading-6">
+              <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  Durban, <br />
-                  KwaZulu-Natal, South Africa
+                  121 Helen Joseph Rd, Bulwer<br />
+                  Durban, Davenport
                 </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+27 (0) 82 123 4567</span>
+                <span>+27 67 886 4334</span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>info@xclusivebarber.co.za</span>
+                <span>ebarbershop988@gmail.com</span>
               </li>
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <h4 className="text-xs uppercase tracking-widest text-black/40 font-medium">
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-white font-montserrat">
               Hours
             </h4>
-            <ul className="space-y-4 text-sm text-black/60">
+            <ul className="space-y-2 text-sm text-white/90 font-poppins leading-6">
               <li className="flex justify-between">
                 <span>Mon - Fri</span>
                 <span>09:00 - 19:00</span>
@@ -126,7 +126,7 @@ export function Footer() {
                 <span>Saturday</span>
                 <span>10:00 - 17:00</span>
               </li>
-              <li className="flex justify-between text-black/30">
+              <li className="flex justify-between text-white/60">
                 <span>Sunday</span>
                 <span>Closed</span>
               </li>
@@ -134,15 +134,15 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-12 border-t border-black/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-black/30">
+        <div className="pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/70 font-poppins">
           <p>
             © 2025 Xclusive Barber - Durban, South Africa. All Rights Reserved.
           </p>
-          <div className="flex gap-8">
-            <a href="#" className="hover:text-black/60">
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white transition-colors">
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-black/60">
+            <a href="#" className="hover:text-white transition-colors">
               Terms of Service
             </a>
           </div>
