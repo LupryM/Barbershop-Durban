@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
 import {
   Instagram,
   Facebook,
@@ -7,6 +9,15 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export function Footer() {
   return (
@@ -18,8 +29,9 @@ export function Footer() {
               XCLUSIVE BARBER
             </h3>
             <p className="text-sm text-white/90 leading-6 max-w-xs font-poppins">
-              Gentlemen Groomers - The Barber Cartel. Durban's premier barbershop delivering exceptional grooming
-              experiences through precision, style, and unmatched expertise.
+              Gentlemen Groomers - The Barber Cartel. Durban's premier
+              barbershop delivering exceptional grooming experiences through
+              precision, style, and unmatched expertise.
             </p>
             <div className="flex gap-3">
               <a
@@ -70,7 +82,10 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/services" className="hover:text-black transition-colors">
+                <a
+                  href="/services"
+                  className="hover:text-black transition-colors"
+                >
                   Book Online
                 </a>
               </li>
@@ -98,7 +113,8 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  121 Helen Joseph Rd, Bulwer<br />
+                  121 Helen Joseph Rd, Bulwer
+                  <br />
                   Durban, Davenport
                 </span>
               </li>
@@ -153,8 +169,9 @@ export function Footer() {
 }
 
 export function Gallery() {
-  const [currentSlide, setCurrentSlide] = React.useState(0);
-  
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
   const images = [
     "/haircuts/braids.webp",
     "/haircuts/fade.webp",
@@ -163,24 +180,24 @@ export function Gallery() {
     "/haircuts/taper.webp",
   ];
 
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [images.length]);
+  // Subtle auto-scroll that respects touches
+  const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % images.length);
-  };
+  useEffect(() => {
+    if (!api) return;
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + images.length) % images.length);
-  };
+    // Set initial dot state
+    setCurrent(api.selectedScrollSnap());
+
+    // Update dot state on scroll
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   return (
-    <section className="py-24 bg-black">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-24 bg-black overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4 font-montserrat">
             Our Work
@@ -190,45 +207,53 @@ export function Gallery() {
           </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
-            {images.map((src, idx) => (
-              <img
-                key={idx}
-                src={src}
-                alt={`Gallery ${idx + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                  idx === currentSlide ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            ))}
-          </div>
+        <div className="relative mx-auto">
+          <Carousel
+            setApi={setApi}
+            opts={{
+              align: "center", // Strictly centers the active item
+              loop: true,
+            }}
+            plugins={[plugin.current]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {images.map((src, idx) => (
+                <CarouselItem
+                  key={idx}
+                  // Back to basis-full: Perfectly 100% wide and centered on mobile
+                  className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
+                >
+                  <div className="relative aspect-[4/5] sm:aspect-square md:aspect-[4/5] overflow-hidden rounded-xl bg-neutral-900">
+                    <img
+                      src={src}
+                      alt={`Gallery ${idx + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
 
-          {/* Navigation Buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
-          >
-            ←
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
-          >
-            →
-          </button>
+            {/* Desktop Navigation Buttons */}
+            <div className="hidden md:block">
+              <CarouselPrevious className="absolute -left-12 top-1/2 -translate-y-1/2 bg-white/10 text-white border-white/20 hover:bg-white hover:text-black transition-all" />
+              <CarouselNext className="absolute -right-12 top-1/2 -translate-y-1/2 bg-white/10 text-white border-white/20 hover:bg-white hover:text-black transition-all" />
+            </div>
+          </Carousel>
 
           {/* Dots Indicator */}
-          <div className="flex justify-center gap-2 mt-6">
+          <div className="flex justify-center gap-2 mt-8">
             {images.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentSlide
-                    ? "bg-white w-8"
-                    : "bg-white/30 hover:bg-white/50"
+                onClick={() => api?.scrollTo(idx)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  idx === current
+                    ? "bg-white w-8" // Active dot expands
+                    : "bg-white/30 w-2 hover:bg-white/50" // Inactive dots remain small
                 }`}
+                aria-label={`Go to image ${idx + 1}`}
               />
             ))}
           </div>
