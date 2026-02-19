@@ -13,12 +13,23 @@ export default function ServicesPage() {
       <Toaster position="top-center" expand={true} richColors />
       
       {/* Header */}
-      <header className="bg-black text-white py-6 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 flex items-center gap-4">
-          <Link href="/" className="hover:text-neutral-400 transition-colors">
-            <ArrowLeft className="w-6 h-6" />
+      <header className="bg-black py-4 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Xclusive Barber Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-xl md:text-2xl font-semibold tracking-tight text-white font-montserrat">
+              XCLUSIVE BARBER
+            </span>
           </Link>
-          <h1 className="text-2xl font-semibold font-montserrat">Book Your Appointment</h1>
+          <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </Link>
         </div>
       </header>
 

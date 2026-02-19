@@ -219,7 +219,7 @@ export function BookingSystem({ hideTitle = false }) {
           </div>
         )}
 
-        <div className="bg-white border border-black/10 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-black/10 overflow-hidden shadow-sm">
           {/* Progress Bar */}
           <div className="flex border-b border-black/5">
             {[1, 2, 3, 4].map((i) => (
@@ -253,7 +253,7 @@ export function BookingSystem({ hideTitle = false }) {
                           setSelectedService(service);
                           nextStep();
                         }}
-                        className={`flex items-center justify-between p-6 rounded-lg border-2 text-left transition-all hover:border-accent group ${
+                        className={`flex items-center justify-between p-6 border-2 text-left transition-all hover:border-accent group ${
                           selectedService?.id === service.id
                             ? "border-accent bg-accent/5"
                             : "border-black/10"
@@ -301,7 +301,7 @@ export function BookingSystem({ hideTitle = false }) {
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-12">
-                    <div className="flex justify-center border border-black/10 rounded-lg p-4">
+                    <div className="flex justify-center border border-black/10 p-4">
                       <DayPicker
                         mode="single"
                         selected={selectedDate}
@@ -319,7 +319,7 @@ export function BookingSystem({ hideTitle = false }) {
                           <button
                             key={time}
                             onClick={() => setSelectedTime(time)}
-                            className={`p-3 text-sm rounded border-2 transition-all ${
+                            className={`p-3 text-sm border-2 transition-all ${
                               selectedTime === time
                                 ? "bg-accent text-accent-foreground border-accent"
                                 : "border-black/10 hover:border-accent text-black"
@@ -332,7 +332,7 @@ export function BookingSystem({ hideTitle = false }) {
                       <button
                         disabled={!selectedTime}
                         onClick={nextStep}
-                        className="w-full bg-accent text-accent-foreground py-4 rounded-lg mt-8 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90 font-medium"
+                        className="w-full bg-accent text-accent-foreground py-4 mt-8 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90 font-medium"
                       >
                         Continue
                       </button>
@@ -425,7 +425,7 @@ export function BookingSystem({ hideTitle = false }) {
 
                     <button
                       type="submit"
-                      className="w-full bg-accent text-accent-foreground py-4 rounded-lg font-medium hover:opacity-90 transition-all shadow-lg"
+                      className="w-full bg-accent text-accent-foreground py-4 font-medium hover:opacity-90 transition-all shadow-lg"
                     >
                       Confirm Appointment
                     </button>
@@ -440,7 +440,7 @@ export function BookingSystem({ hideTitle = false }) {
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12 space-y-6"
                 >
-                  <div className="w-20 h-20 bg-accent text-accent-foreground rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <div className="w-20 h-20 bg-accent text-accent-foreground flex items-center justify-center mx-auto mb-6 shadow-lg">
                     <CheckCircle className="w-10 h-10" />
                   </div>
                   <h3 className="text-3xl font-light text-black">
@@ -455,7 +455,7 @@ export function BookingSystem({ hideTitle = false }) {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     <a
                       href="/login"
-                      className="bg-accent text-accent-foreground px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:opacity-90 transition-all"
+                      className="bg-accent text-accent-foreground px-8 py-3 text-sm uppercase tracking-wider font-semibold hover:opacity-90 transition-all font-montserrat"
                     >
                       Sign in to track bookings
                     </a>
@@ -466,7 +466,7 @@ export function BookingSystem({ hideTitle = false }) {
                         setSelectedTime(null);
                         setFormData({ name: "", phone: "" });
                       }}
-                      className="border-2 border-black/10 text-black/60 px-8 py-3 text-[11px] uppercase tracking-[0.2em] font-medium hover:border-black/30 hover:text-black transition-all"
+                      className="border-2 border-black/10 text-black/60 px-8 py-3 text-sm uppercase tracking-wider font-semibold hover:border-black/30 hover:text-black transition-all font-montserrat"
                     >
                       Make another booking
                     </button>

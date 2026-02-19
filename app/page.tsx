@@ -69,7 +69,7 @@ export default function App() {
             </a>
             <a
               href="/services"
-              className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide rounded-full font-poppins"
+              className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide font-poppins"
             >
               BOOK NOW
             </a>

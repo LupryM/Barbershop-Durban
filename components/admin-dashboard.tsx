@@ -109,26 +109,26 @@ export function AdminDashboard({ user }: { user: UserData }) {
       <Toaster position="top-center" expand={true} richColors />
 
       {/* Header */}
-      <header className="border-b border-black/5">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 flex items-center justify-center">
-                <img src="/logo.png" alt="Xclusive Barber Logo" className="w-full h-full object-contain" />
-              </div>
-              <span className="text-xl font-light tracking-tighter">XCLUSIVE BARBER</span>
-            </Link>
-          </div>
+      <header className="bg-black py-4">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img src="/logo.png" alt="Xclusive Barber Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="text-xl md:text-2xl font-semibold tracking-tight text-white font-montserrat">
+              XCLUSIVE BARBER
+            </span>
+          </Link>
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-black/40 font-medium">
-              <User className="w-3 h-3" />
+            <div className="hidden md:flex items-center gap-2 text-sm text-white/60 font-semibold font-montserrat">
+              <User className="w-4 h-4" />
               Admin
             </div>
-            <Link href="/" className="text-[11px] text-black/40 hover:text-black transition-colors uppercase tracking-[0.2em] font-medium flex items-center gap-2">
-              <Home className="w-3 h-3" /> Home
+            <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat flex items-center gap-2">
+              <Home className="w-4 h-4" /> Home
             </Link>
-            <button onClick={handleLogout} className="text-[11px] text-black/40 hover:text-black transition-colors uppercase tracking-[0.2em] font-medium flex items-center gap-2">
-              <LogOut className="w-3 h-3" /> Logout
+            <button onClick={handleLogout} className="text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat flex items-center gap-2">
+              <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </div>
@@ -249,7 +249,7 @@ export function AdminDashboard({ user }: { user: UserData }) {
                                   <select
                                     value={apt.status}
                                     onChange={(e) => handleStatusChange(apt.id, e.target.value)}
-                                    className="text-xs bg-white border-2 border-black/10 text-black px-2 py-1 rounded focus:border-accent focus:outline-none"
+                                    className="text-xs bg-white border-2 border-black/10 text-black px-2 py-1 focus:border-accent focus:outline-none"
                                   >
                                     <option value="pending">Pending</option>
                                     <option value="confirmed">Confirmed</option>
