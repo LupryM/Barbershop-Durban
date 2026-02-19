@@ -49,7 +49,7 @@ export function Services() {
             <div className="grid sm:grid-cols-2 gap-x-12 gap-y-16">
               {serviceCategories.map((service, index) => (
                 <div key={index} className="space-y-4 group">
-                  <div className="w-12 h-12 flex items-center justify-center border-2 border-black/10 rounded-full group-hover:bg-accent group-hover:border-accent group-hover:text-accent-foreground transition-all duration-300">
+                  <div className="w-12 h-12 flex items-center justify-center border-2 border-black/10 group-hover:bg-accent group-hover:border-accent group-hover:text-accent-foreground transition-all duration-300">
                     <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
@@ -65,7 +65,7 @@ export function Services() {
             </div>
 
             <Link href="/services">
-              <button className="mt-8 px-10 py-4 bg-accent text-white font-bold rounded-full hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
+              <button className="mt-8 px-10 py-4 bg-accent text-white font-bold hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
                 View Prices
               </button>
             </Link>

@@ -34,8 +34,8 @@ export default function LoginPage() {
       <Toaster position="top-center" expand={true} richColors />
 
       {/* Nav */}
-      <nav className="px-6 py-6 border-b border-black/5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <nav className="bg-black py-4">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 flex items-center justify-center">
               <img
@@ -44,16 +44,16 @@ export default function LoginPage() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-xl font-light tracking-tighter text-black">
+            <span className="text-xl md:text-2xl font-semibold tracking-tight text-white font-montserrat">
               XCLUSIVE BARBER
             </span>
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-black/40 hover:text-black transition-colors font-medium"
+            className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to site
+            Back
           </Link>
         </div>
       </nav>

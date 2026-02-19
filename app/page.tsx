@@ -69,7 +69,7 @@ export default function App() {
             </a>
             <a
               href="/services"
-              className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide rounded-full font-poppins"
+              className="px-5 py-4 bg-accent text-accent-foreground hover:opacity-90 transition-all font-bold tracking-wide font-poppins"
             >
               BOOK NOW
             </a>
@@ -86,64 +86,64 @@ export default function App() {
 
         {/* Full-Screen Mobile Menu */}
         {mobileMenuOpen && (
-          <>
+          <div className="fixed inset-0 z-[100] md:hidden">
             <div 
-              className="fixed inset-0 bg-black/50 z-[100] md:hidden"
+              className="absolute inset-0 bg-black/50"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-accent z-[101] md:hidden animate-in slide-in-from-right duration-300 shadow-2xl">
+            <div className="absolute top-0 right-0 bottom-0 w-[80%] max-w-sm bg-accent shadow-2xl overflow-y-auto">
               <button
-                className="absolute top-6 right-6 text-white p-2"
+                className="absolute top-6 right-6 text-accent-foreground p-2 z-10"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <X className="w-6 h-6" />
               </button>
-              <div className="pt-20 px-8 flex flex-col gap-8 text-lg font-semibold text-white font-montserrat">
+              <div className="pt-20 px-8 flex flex-col gap-8 text-lg font-semibold text-accent-foreground font-montserrat">
                 <a
                   href="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-neutral-300 transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
                   Home
                 </a>
                 <a
                   href="#services"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-neutral-300 transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
                   Services
                 </a>
                 <a
                   href="#location"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-neutral-300 transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
                   Location
                 </a>
                 <a
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-neutral-300 transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
                   Login / Sign Up
                 </a>
                 <a
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-neutral-300 transition-colors"
+                  className="hover:opacity-80 transition-opacity"
                 >
                   My Bookings
                 </a>
                 <a
                   href="/services"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-white font-bold mt-4"
+                  className="bg-black text-white px-8 py-4 text-center font-bold mt-4 hover:opacity-90 transition-all"
                 >
                   Book Appointment
                 </a>
               </div>
             </div>
-          </>
+          </div>
         )}
       </nav>
 
