@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { Scissors, Paintbrush, CircleDot, Smile } from "lucide-react";
 
 const serviceCategories = [
@@ -6,26 +7,22 @@ const serviceCategories = [
     icon: Scissors,
     title: "XCLUSIVE Haircut",
     description:
-      "Normal haircut (R100), Haircut with dye (R150), Full house with dye and fibre (R180)",
-    price: "From R100",
+      "Professional cuts tailored to your style. From classic to modern fades.",
   },
   {
     icon: Paintbrush,
     title: "Hair Colouring",
-    description: "Black (R100), Blond (R100), White (R200)",
-    price: "From R100",
+    description: "Transform your look with expert hair colouring services.",
   },
   {
     icon: CircleDot,
     title: "XCLUSIVE Bald Cut",
-    description: "Clipper chiskop (R60), Razor blade chiskop (R70)",
-    price: "From R60",
+    description: "Clean, precise bald cuts with clipper or razor blade finish.",
   },
   {
     icon: Smile,
     title: "XCLUSIVE Beard",
-    description: "Beard shave (R20), Beard with dye (R50)",
-    price: "From R20",
+    description: "Professional beard grooming and styling services.",
   },
 ];
 
@@ -40,10 +37,10 @@ export function Services() {
         <div className="grid lg:grid-cols-2 gap-24 items-center">
           <div className="space-y-12">
             <div>
-              <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block">
+              <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block font-montserrat">
                 XCLUSIVE Services
               </span>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
+              <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat">
                 All types of XCLUSIVE <br />
                 cuts and styles.
               </h2>
@@ -56,19 +53,22 @@ export function Services() {
                     <service.icon className="w-5 h-5 text-black/60 group-hover:text-accent-foreground" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-light group-hover:text-accent transition-colors duration-300">
+                    <h3 className="text-xl font-semibold group-hover:text-accent transition-colors duration-300 font-montserrat">
                       {service.title}
                     </h3>
-                    <p className="text-sm text-black/50 leading-relaxed">
+                    <p className="text-sm text-black/60 leading-relaxed font-open-sans">
                       {service.description}
-                    </p>
-                    <p className="text-sm font-medium pt-2 text-accent">
-                      {service.price}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
+
+            <Link href="/services">
+              <button className="mt-8 px-10 py-4 bg-accent text-white font-bold rounded-full hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
+                View Prices
+              </button>
+            </Link>
           </div>
 
           <div className="relative aspect-[4/5] overflow-hidden rounded-sm shadow-2xl">

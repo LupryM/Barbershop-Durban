@@ -19,14 +19,14 @@ export function LocationMap() {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
 
   return (
-    <section id="location" className="py-24 bg-[#0a0a0a] text-white">
+    <section id="location" className="py-24 bg-black text-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="mb-16">
-          <span className="text-white/40 uppercase tracking-widest text-xs mb-4 block">
+          <span className="text-white/40 uppercase tracking-widest text-xs mb-4 block font-montserrat">
             Find Us
           </span>
-          <h2 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
+          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat">
             Visit XCLUSIVE BARBER <br />
             in Davenport, Durban.
           </h2>
@@ -53,8 +53,8 @@ export function LocationMap() {
             <div className="border border-white/10 p-6 flex items-start gap-4">
               <MapPin className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-medium">Address</h3>
-                <p className="text-sm text-white/60 leading-relaxed">
+                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-3 font-semibold font-montserrat">Address</h3>
+                <p className="text-sm text-white/80 leading-relaxed font-poppins">
                   {location.address}<br />
                   {location.city}, {location.province}<br />
                   {location.postalCode}

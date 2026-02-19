@@ -16,17 +16,17 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.967 0.001 286.375);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.55 0.22 25); /* Vibrant Red accent */
+  --accent: oklch(0.42 0.18 25); /* Deep red-800 accent matching reference */
   --accent-foreground: oklch(0.985 0 0); /* White text on red */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.55 0.22 25); /* Red ring to match accent */
+  --ring: oklch(0.42 0.18 25); /* Red-800 ring to match accent */
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.55 0.22 25); /* Red for sidebar primary */
+  --sidebar-primary: oklch(0.42 0.18 25); /* Red-800 for sidebar primary */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -65,8 +65,10 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
+  --font-montserrat: var(--font-montserrat);
+  --font-poppins: var(--font-poppins);
+  --font-open-sans: var(--font-open-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

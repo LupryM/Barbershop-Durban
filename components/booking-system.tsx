@@ -137,10 +137,9 @@ const timeSlots = [
   "06:00 PM",
 ];
 
-export function BookingSystem() {
+export function BookingSystem({ hideTitle = false }) {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<any>(null);
-  const [selectedBarber, setSelectedBarber] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date()
   );
@@ -156,7 +155,6 @@ export function BookingSystem() {
     // Store booking info locally for testing
     const booking = {
       service: selectedService,
-      barber: selectedBarber,
       date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
       time: selectedTime,
       name: formData.name,
@@ -168,7 +166,6 @@ export function BookingSystem() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          barber_id: selectedBarber.id,
           service_name: selectedService.name,
           service_price: selectedService.price,
           service_duration: selectedService.duration,
@@ -211,19 +208,21 @@ export function BookingSystem() {
         }
       `}</style>
       <div className="max-w-4xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-light mb-4 tracking-tight text-black">
-            Book Your Appointment
-          </h2>
-          <p className="text-black/50 max-w-lg mx-auto">
-            Select your preferred service and time. We'll handle the rest.
-          </p>
-        </div>
+        {!hideTitle && (
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold mb-4 tracking-tight text-black font-montserrat">
+              Book Your Appointment
+            </h2>
+            <p className="text-black/60 max-w-lg mx-auto font-open-sans">
+              Select your preferred service and time. We'll handle the rest.
+            </p>
+          </div>
+        )}
 
         <div className="bg-white border border-black/10 rounded-xl overflow-hidden shadow-sm">
           {/* Progress Bar */}
           <div className="flex border-b border-black/5">
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
                 className={`flex-1 h-1.5 transition-colors duration-500 ${
@@ -243,7 +242,7 @@ export function BookingSystem() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h3 className="text-2xl font-light mb-8 text-black">
+                  <h3 className="text-2xl font-semibold mb-8 text-black font-montserrat">
                     Select Service
                   </h3>
                   <div className="grid gap-4">
@@ -281,64 +280,6 @@ export function BookingSystem() {
               )}
 
               {step === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
-                >
-                  <div className="flex items-center justify-between mb-8">
-                    <button
-                      onClick={prevStep}
-                      className="flex items-center text-sm hover:text-black transition-colors text-black/60"
-                    >
-                      <ChevronLeft className="w-4 h-4 mr-1" /> Back
-                    </button>
-                    <h3 className="text-2xl font-light text-black">
-                      Choose Your Barber
-                    </h3>
-                    <div className="w-12" />
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {barbers.map((barber) => (
-                      <button
-                        key={barber.id}
-                        onClick={() => {
-                          setSelectedBarber(barber);
-                          nextStep();
-                        }}
-                        className={`flex flex-col p-6 rounded-lg border-2 text-center transition-all hover:border-accent group ${
-                          selectedBarber?.id === barber.id
-                            ? "border-accent bg-accent/5"
-                            : "border-black/10"
-                        }`}
-                      >
-                        <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-black/5 overflow-hidden">
-                          <img
-                            src={barber.image}
-                            alt={barber.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <h4 className="font-medium text-lg mb-1 text-black">
-                          {barber.name}
-                        </h4>
-                        <p className="text-sm text-black/80 mb-1">
-                          {barber.specialty}
-                        </p>
-                        <p className="text-xs text-black/40">
-                          {barber.experience}
-                        </p>
-                        <ArrowRight className="w-4 h-4 mt-4 mx-auto opacity-0 group-hover:opacity-100 transition-opacity text-black" />
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {step === 3 && (
                 <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: 20 }}
@@ -400,9 +341,9 @@ export function BookingSystem() {
                 </motion.div>
               )}
 
-              {step === 4 && (
+              {step === 3 && (
                 <motion.div
-                  key="step4"
+                  key="step3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -466,12 +407,6 @@ export function BookingSystem() {
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-black/50">Barber</span>
-                        <span className="font-medium text-black">
-                          {selectedBarber?.name}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
                         <span className="text-black/50">Date & Time</span>
                         <span className="font-medium text-black">
                           {selectedDate
@@ -498,9 +433,9 @@ export function BookingSystem() {
                 </motion.div>
               )}
 
-              {step === 5 && (
+              {step === 4 && (
                 <motion.div
-                  key="step5"
+                  key="step4"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-12 space-y-6"
@@ -513,7 +448,7 @@ export function BookingSystem() {
                   </h3>
                   <p className="text-black/60 max-w-sm mx-auto">
                     Thanks, {formData.name}. We've received your request for{" "}
-                    {selectedService?.name} with {selectedBarber?.name} on{" "}
+                    {selectedService?.name} on{" "}
                     {selectedDate ? format(selectedDate, "MMM dd") : ""}. We'll
                     confirm your booking via WhatsApp or phone shortly.
                   </p>
@@ -528,7 +463,6 @@ export function BookingSystem() {
                       onClick={() => {
                         setStep(1);
                         setSelectedService(null);
-                        setSelectedBarber(null);
                         setSelectedTime(null);
                         setFormData({ name: "", phone: "" });
                       }}
