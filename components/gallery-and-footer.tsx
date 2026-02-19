@@ -153,25 +153,86 @@ export function Footer() {
 }
 
 export function Gallery() {
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  
   const images = [
     "/haircuts/braids.webp",
     "/haircuts/fade.webp",
     "/haircuts/kid.webp",
     "/haircuts/rashford.webp",
+    "/haircuts/taper.webp",
   ];
 
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % images.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   return (
-    <section className="py-2 bg-white">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {images.map((src, idx) => (
-          <div key={idx} className="aspect-square overflow-hidden group">
-            <img
-              src={src}
-              alt={`Gallery ${idx}`}
-              className="w-full h-full object-cover hover:scale-105 transition-all duration-700 cursor-pointer"
-            />
+    <section className="py-24 bg-black">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4 font-montserrat">
+            Our Work
+          </h2>
+          <p className="text-white/70 font-open-sans">
+            See the XCLUSIVE transformations
+          </p>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+            {images.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt={`Gallery ${idx + 1}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                  idx === currentSlide ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            ))}
           </div>
-        ))}
+
+          {/* Navigation Buttons */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
+          >
+            ←
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
+          >
+            →
+          </button>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center gap-2 mt-6">
+            {images.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  idx === currentSlide
+                    ? "bg-white w-8"
+                    : "bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

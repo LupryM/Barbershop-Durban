@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { Scissors, Paintbrush, CircleDot, Smile } from "lucide-react";
 
 const serviceCategories = [
@@ -6,26 +7,22 @@ const serviceCategories = [
     icon: Scissors,
     title: "XCLUSIVE Haircut",
     description:
-      "Normal haircut (R100), Haircut with dye (R150), Full house with dye and fibre (R180)",
-    price: "From R100",
+      "Professional cuts tailored to your style. From classic to modern fades.",
   },
   {
     icon: Paintbrush,
     title: "Hair Colouring",
-    description: "Black (R100), Blond (R100), White (R200)",
-    price: "From R100",
+    description: "Transform your look with expert hair colouring services.",
   },
   {
     icon: CircleDot,
     title: "XCLUSIVE Bald Cut",
-    description: "Clipper chiskop (R60), Razor blade chiskop (R70)",
-    price: "From R60",
+    description: "Clean, precise bald cuts with clipper or razor blade finish.",
   },
   {
     icon: Smile,
     title: "XCLUSIVE Beard",
-    description: "Beard shave (R20), Beard with dye (R50)",
-    price: "From R20",
+    description: "Professional beard grooming and styling services.",
   },
 ];
 
@@ -43,10 +40,15 @@ export function Services() {
               <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block font-montserrat">
                 XCLUSIVE Services
               </span>
-              <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat">
-                All types of XCLUSIVE <br />
-                cuts and styles.
-              </h2>
+              <Link href="/services">
+                <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat cursor-pointer hover:text-accent transition-colors">
+                  All types of XCLUSIVE <br />
+                  cuts and styles.
+                </h2>
+              </Link>
+              <p className="text-sm text-black/50 mt-4 font-open-sans">
+                Click to view full pricing →
+              </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-x-12 gap-y-16">
@@ -61,9 +63,6 @@ export function Services() {
                     </h3>
                     <p className="text-sm text-black/60 leading-relaxed font-open-sans">
                       {service.description}
-                    </p>
-                    <p className="text-sm font-semibold pt-2 text-accent font-montserrat">
-                      {service.price}
                     </p>
                   </div>
                 </div>

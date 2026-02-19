@@ -84,62 +84,74 @@ export default function App() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Full-Screen Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-accent md:hidden animate-in slide-in-from-top duration-300 shadow-xl">
-            <div className="p-6 flex flex-col gap-6 text-[17px] font-semibold text-white font-montserrat">
-              <a
-                href="/"
+          <>
+            <div 
+              className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-accent z-[70] md:hidden animate-in slide-in-from-right duration-300 shadow-2xl">
+              <button
+                className="absolute top-6 right-6 text-white p-2"
                 onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-neutral-300"
               >
-                Home
-              </a>
-              <a
-                href="#services"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-neutral-300"
-              >
-                Services
-              </a>
-              <a
-                href="#location"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-neutral-300"
-              >
-                Location
-              </a>
-              <a
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-neutral-300"
-              >
-                Login / Sign Up
-              </a>
-              <a
-                href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-neutral-300"
-              >
-                My Bookings
-              </a>
-              <a
-                href="#book"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-white font-bold"
-              >
-                Book Appointment
-              </a>
+                <X className="w-6 h-6" />
+              </button>
+              <div className="pt-20 px-8 flex flex-col gap-8 text-lg font-semibold text-white font-montserrat">
+                <a
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:text-neutral-300 transition-colors"
+                >
+                  Home
+                </a>
+                <a
+                  href="#services"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:text-neutral-300 transition-colors"
+                >
+                  Services
+                </a>
+                <a
+                  href="#location"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:text-neutral-300 transition-colors"
+                >
+                  Location
+                </a>
+                <a
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:text-neutral-300 transition-colors"
+                >
+                  Login / Sign Up
+                </a>
+                <a
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:text-neutral-300 transition-colors"
+                >
+                  My Bookings
+                </a>
+                <a
+                  href="#book"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-white font-bold mt-4"
+                >
+                  Book Appointment
+                </a>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </nav>
 
       <main>
         <Hero />
-        <Services />
         <Gallery />
         <BookingSystem />
+        <Services />
         <LocationMap />
       </main>
 
