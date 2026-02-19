@@ -40,15 +40,10 @@ export function Services() {
               <span className="text-black/40 uppercase tracking-widest text-xs mb-4 block font-montserrat">
                 XCLUSIVE Services
               </span>
-              <Link href="/services">
-                <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat cursor-pointer hover:text-accent transition-colors">
-                  All types of XCLUSIVE <br />
-                  cuts and styles.
-                </h2>
-              </Link>
-              <p className="text-sm text-black/50 mt-4 font-open-sans">
-                Click to view full pricing →
-              </p>
+              <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight font-montserrat">
+                All types of XCLUSIVE <br />
+                cuts and styles.
+              </h2>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-x-12 gap-y-16">
@@ -68,6 +63,12 @@ export function Services() {
                 </div>
               ))}
             </div>
+
+            <Link href="/services">
+              <button className="mt-8 px-10 py-4 bg-accent text-white font-bold rounded-full hover:opacity-90 transition-all font-poppins uppercase tracking-wide">
+                View Prices
+              </button>
+            </Link>
           </div>
 
           <div className="relative aspect-[4/5] overflow-hidden rounded-sm shadow-2xl">
