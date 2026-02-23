@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Poppins, Open_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AuthProvider } from "@/context/auth-context";
 import "./globals.css";
 
 const montserrat = Montserrat({ 
@@ -48,7 +49,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${poppins.variable} ${openSans.variable} font-sans antialiased`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

@@ -1,36 +1,38 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CustomerDashboard } from "@/components/customer-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { BarberDashboard } from "@/components/barber-dashboard";
 import { Toaster } from "sonner";
-
-interface UserData {
-  name: string;
-  role: string;
-}
+import { useAuth } from "@/context/auth-context";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<UserData | null>(null);
+  const { user, isLoggedIn, isLoading } = useAuth();
 
   useEffect(() => {
-    const stored = localStorage.getItem("xclusiveUser");
-    if (stored) {
-      setUser(JSON.parse(stored));
-    } else {
-      router.push("/login");
+    // Wait for auth hydration before deciding to redirect
+    if (!isLoading && !isLoggedIn) {
+      router.push("/login?returnTo=/dashboard");
     }
-  }, [router]);
+  }, [isLoading, isLoggedIn, router]);
 
-  if (!user) return null;
+  // Show nothing while hydrating (avoids flash)
+  if (isLoading || !user) return null;
 
-  if (user.role === "admin") {
-    return <AdminDashboard user={user} />;
-  }
-  if (user.role === "barber") {
-    return <BarberDashboard user={user} />;
-  }
-  return <CustomerDashboard user={user} />;
+  // Toaster lives here for dashboard-level toasts
+  const content = (() => {
+    if (user.role === "admin")  return <AdminDashboard  user={user} />;
+    if (user.role === "barber") return <BarberDashboard user={user} />;
+    return <CustomerDashboard user={user} />;
+  })();
+
+  return (
+    <>
+      <Toaster position="top-center" expand={true} richColors />
+      {content}
+    </>
+  );
 }
