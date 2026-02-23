@@ -9,7 +9,7 @@ export function Hero() {
         <img
           src="/hero/hero.jpeg"
           alt="Xclusive Barber"
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover opacity-55"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
       </div>
