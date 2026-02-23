@@ -169,11 +169,16 @@ export function Gallery() {
   const [current, setCurrent] = useState(0);
 
   const images = [
-    "/haircuts/braids.webp",
-    "/haircuts/fade.webp",
+    "/haircuts/brushfade.webp",
     "/haircuts/kid.webp",
-    "/haircuts/rashford.webp",
     "/haircuts/taper.webp",
+    "/haircuts/braids.webp",
+    "/haircuts/blackhoodie.webp",
+    "/haircuts/kid2.webp",
+    "/haircuts/beard.webp",
+    "/haircuts/afro.webp",
+    "/haircuts/fade.webp",
+    "/haircuts/rashford.webp",
   ];
 
   // Subtle auto-scroll that respects touches

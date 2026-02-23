@@ -7,7 +7,7 @@ export function Hero() {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920"
+          src="/hero/hero.jpeg"
           alt="Xclusive Barber"
           className="w-full h-full object-cover opacity-40"
         />
@@ -20,7 +20,9 @@ export function Hero() {
           XCLUSIVE BARBER
         </h1>
         <p className="text-lg md:text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed text-pretty font-open-sans">
-          Davenport - All types of XCLUSIVE haircuts, hair colouring, bald cuts, beard services, and hectic designs. Experience professional grooming at its finest.
+          Davenport - All types of XCLUSIVE haircuts, hair colouring, bald cuts,
+          beard services, and hectic designs. Experience professional grooming
+          at its finest.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
