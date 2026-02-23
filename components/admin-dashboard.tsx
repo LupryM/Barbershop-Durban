@@ -4,13 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar as CalendarIcon, Clock, DollarSign, LogOut, ChevronLeft, ChevronRight, Home, User } from 'lucide-react';
 import { format, addDays, startOfWeek } from 'date-fns';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import Link from 'next/link';
-
-interface UserData {
-  name: string;
-  role: string;
-}
+import { useAuth, type AuthUser } from '@/context/auth-context';
 
 interface Appointment {
   id: number;
@@ -24,8 +20,9 @@ interface Appointment {
   customer_phone: string;
 }
 
-export function AdminDashboard({ user }: { user: UserData }) {
+export function AdminDashboard({ user }: { user: AuthUser }) {
   const router = useRouter();
+  const { logout } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'day' | 'week'>('day');
@@ -73,9 +70,8 @@ export function AdminDashboard({ user }: { user: UserData }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('xclusiveUser');
+    logout();
     router.push('/');
-    router.refresh();
   };
 
   const timeSlots = Array.from({ length: 10 }, (_, i) => {
@@ -106,7 +102,6 @@ export function AdminDashboard({ user }: { user: UserData }) {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Toaster position="top-center" expand={true} richColors />
 
       {/* Header */}
       <header className="bg-black py-4">

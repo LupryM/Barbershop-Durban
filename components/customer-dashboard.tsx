@@ -4,13 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Clock, X, Edit2, LogOut, Plus, Home, User } from 'lucide-react';
 import { format } from 'date-fns';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import Link from 'next/link';
-
-interface UserData {
-  name: string;
-  role: string;
-}
+import { useAuth, type AuthUser } from '@/context/auth-context';
 
 interface Appointment {
   id: number;
@@ -24,8 +20,9 @@ interface Appointment {
   created_at: string;
 }
 
-export function CustomerDashboard({ user }: { user: UserData }) {
+export function CustomerDashboard({ user }: { user: AuthUser }) {
   const router = useRouter();
+  const { logout } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,9 +60,8 @@ export function CustomerDashboard({ user }: { user: UserData }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('xclusiveUser');
+    logout();
     router.push('/');
-    router.refresh();
   };
 
   const upcoming = appointments.filter(a => a.status !== 'cancelled' && a.status !== 'completed');
@@ -73,7 +69,6 @@ export function CustomerDashboard({ user }: { user: UserData }) {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Toaster position="top-center" expand={true} richColors />
 
       {/* Header */}
       <header className="bg-black py-4">
