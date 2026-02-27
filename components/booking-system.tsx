@@ -522,12 +522,14 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           </p>
                           <div className="space-y-4 max-w-sm mx-auto">
                             <div className="space-y-2">
-                              <label className="text-xs uppercase tracking-widest text-black/40 font-medium">
+                              <label htmlFor="booking-phone" className="text-xs uppercase tracking-widest text-black/40 font-medium">
                                 Phone Number
                               </label>
                               <div className="relative">
                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
+                                  id="booking-phone"
+                                  autoComplete="tel"
                                   type="tel"
                                   value={phone}
                                   onChange={(e) => setPhone(e.target.value)}
@@ -564,10 +566,12 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           </p>
                           <div className="space-y-4 max-w-sm mx-auto">
                             <div className="space-y-2">
-                              <label className="text-xs uppercase tracking-widest text-black/40 font-medium">
+                              <label htmlFor="booking-otp" className="text-xs uppercase tracking-widest text-black/40 font-medium">
                                 6-digit code
                               </label>
                               <input
+                                id="booking-otp"
+                                autoComplete="one-time-code"
                                 type="text"
                                 inputMode="numeric"
                                 maxLength={6}
@@ -610,12 +614,14 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           </p>
                           <div className="space-y-4 max-w-sm mx-auto">
                             <div className="space-y-2">
-                              <label className="text-xs uppercase tracking-widest text-black/40 font-medium">
+                              <label htmlFor="booking-name" className="text-xs uppercase tracking-widest text-black/40 font-medium">
                                 Your Name
                               </label>
                               <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
+                                  id="booking-name"
+                                  autoComplete="name"
                                   type="text"
                                   value={newName}
                                   onChange={(e) => setNewName(e.target.value)}
@@ -650,10 +656,12 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
 
                           <div className="space-y-4">
                             <div className="space-y-2">
-                              <label className="text-xs uppercase tracking-widest text-black/40 font-medium">Full Name</label>
+                              <label htmlFor="guest-name" className="text-xs uppercase tracking-widest text-black/40 font-medium">Full Name</label>
                               <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
+                                  id="guest-name"
+                                  autoComplete="name"
                                   type="text"
                                   value={guestName}
                                   onChange={(e) => setGuestName(e.target.value)}
@@ -663,10 +671,12 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <label className="text-xs uppercase tracking-widest text-black/40 font-medium">Phone Number</label>
+                              <label htmlFor="guest-phone" className="text-xs uppercase tracking-widest text-black/40 font-medium">Phone Number</label>
                               <div className="relative">
                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
+                                  id="guest-phone"
+                                  autoComplete="tel"
                                   type="tel"
                                   value={guestPhone}
                                   onChange={(e) => setGuestPhone(e.target.value)}
