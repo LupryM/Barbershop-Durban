@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 
 export function Hero() {
@@ -6,10 +7,12 @@ export function Hero() {
     <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           src="/hero/hero.jpeg"
           alt="Xclusive Barber"
-          className="w-full h-full object-cover opacity-55"
+          fill
+          priority
+          className="object-cover opacity-55"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90" />
       </div>
