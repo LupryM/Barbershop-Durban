@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import {
   Instagram,
   Facebook,
@@ -226,10 +227,12 @@ export function Gallery() {
                   className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
                 >
                   <div className="relative aspect-[4/5] sm:aspect-square md:aspect-[4/5] overflow-hidden rounded-xl bg-neutral-900">
-                    <img
+                    <Image
                       src={src}
                       alt={`Gallery ${idx + 1}`}
-                      className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
                     />
                   </div>
                 </CarouselItem>
