@@ -16,7 +16,7 @@ export type UserRole = "customer" | "barber" | "admin";
 export interface AuthUser {
   id: string;
   name: string;
-  phone: string;
+  email: string;
   role: UserRole;
   /** Supabase access token — used to authenticate API requests */
   accessToken?: string;
@@ -28,7 +28,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (user: AuthUser) => void;
   logout: () => Promise<void>;
-  updateUser: (partial: Partial<Pick<AuthUser, "name" | "phone">>) => void;
+  updateUser: (partial: Partial<Pick<AuthUser, "name" | "email">>) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -72,14 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", userId)
       .single();
 
-    // Get phone from Supabase auth metadata
+    // Get email from Supabase auth metadata
     const { data: { user: authUser } } = await supabase.auth.getUser();
-    const phone = authUser?.phone ?? "";
+    const email = authUser?.email ?? "";
 
     setUser({
       id: userId,
       name: profile?.full_name ?? "",
-      phone,
+      email,
       role: (profile?.role as UserRole) ?? "customer",
       accessToken,
     });
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const updateUser = (partial: Partial<Pick<AuthUser, "name" | "phone">>) => {
+  const updateUser = (partial: Partial<Pick<AuthUser, "name" | "email">>) => {
     if (!user) return;
     setUser({ ...user, ...partial });
   };

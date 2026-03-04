@@ -11,7 +11,7 @@ import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  Phone,
+  Mail,
   User,
   ShieldCheck,
   ChevronRight,
@@ -47,7 +47,7 @@ function LoginContent() {
 
   // Customer OTP flow
   const [step, setStep]       = useState<Step>("entry");
-  const [phone, setPhone]     = useState("");
+  const [email, setEmail]     = useState("");
   const [otp, setOtp]         = useState("");
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,14 +59,17 @@ function LoginContent() {
   // ── Customer flow ────────────────────────────────────────────────────────
 
   const handleSendOtp = async () => {
-    if (!phone.trim()) { toast.error("Enter a phone number"); return; }
+    if (!email.trim() || !email.includes('@')) { toast.error("Enter a valid email"); return; }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: phone.trim() });
+      const { error } = await supabase.auth.signInWithOtp({ 
+        email: email.trim(),
+        options: { shouldCreateUser: true }
+      });
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Code sent! Check your SMS.");
+        toast.success("Code sent! Check your email.");
         setStep("otp");
       }
     } catch {
@@ -81,9 +84,9 @@ function LoginContent() {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({
-        phone: phone.trim(),
+        email: email.trim(),
         token: otp,
-        type: "sms",
+        type: "email",
       });
 
       if (error) {
@@ -104,7 +107,7 @@ function LoginContent() {
         const authUser: AuthUser = {
           id: data.user!.id,
           name: profile.full_name,
-          phone: phone.trim(),
+          email: email.trim(),
           role: (profile.role as UserRole) ?? "customer",
           accessToken: data.session?.access_token,
         };
@@ -140,7 +143,7 @@ function LoginContent() {
       const userData: AuthUser = {
         id: authUser.id,
         name: newName.trim(),
-        phone: phone.trim(),
+        email: email.trim(),
         role: "customer",
         accessToken: session?.access_token,
       };
@@ -158,11 +161,11 @@ function LoginContent() {
 
   const handleStaffLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone.trim()) { toast.error("Enter your phone number"); return; }
+    if (!email.trim() || !email.includes('@')) { toast.error("Enter your email"); return; }
     setLoading(true);
     try {
-      // Staff authenticate via phone OTP like customers — role is in profiles table
-      const { error } = await supabase.auth.signInWithOtp({ phone: phone.trim() });
+      // Staff authenticate via email OTP like customers — role is in profiles table
+      const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
       if (error) {
         toast.error(error.message);
       } else {
@@ -227,22 +230,22 @@ function LoginContent() {
                       Sign In
                     </h1>
                     <p className="text-black/50 text-sm leading-relaxed">
-                      Enter your phone number and we'll send a verification code.
+                      Enter your email address and we'll send a verification code.
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
-                        Phone Number
+                        Email Address
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                         <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+27 67 886 4334"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
                           className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
                           onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
                         />
@@ -251,7 +254,7 @@ function LoginContent() {
 
                     <button
                       onClick={handleSendOtp}
-                      disabled={!phone.trim() || loading}
+                      disabled={!email.trim() || !email.includes('@') || loading}
                       className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? "Sending…" : (
@@ -285,7 +288,7 @@ function LoginContent() {
                       Enter Code
                     </h1>
                     <p className="text-black/50 text-sm leading-relaxed">
-                      Code sent to <strong>{phone}</strong>.{" "}
+                      Code sent to <strong>{email}</strong>.{" "}
                       <button
                         onClick={() => { setStep("entry"); setOtp(""); }}
                         className="underline text-black/50 hover:text-black transition-colors"
@@ -401,20 +404,20 @@ function LoginContent() {
                   Staff Sign In
                 </h1>
                 <p className="text-black/50 text-sm leading-relaxed">
-                  Sign in with your registered phone number.
+                  Sign in with your registered email address.
                 </p>
               </div>
 
               <form onSubmit={handleStaffLogin} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">Phone Number</label>
+                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">Email Address</label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                     <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+27 67 886 4334"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="staff@xclusivebarbers.com"
                       className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
                     />
                   </div>
@@ -422,7 +425,7 @@ function LoginContent() {
 
                 <button
                   type="submit"
-                  disabled={loading || !phone.trim()}
+                  disabled={loading || !email.trim() || !email.includes('@')}
                   className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Sending code…" : "Send Code"}

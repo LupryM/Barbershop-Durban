@@ -3,14 +3,14 @@ import { createServerSupabaseClient } from '@/lib/supabase/client';
 
 export async function POST(request: NextRequest) {
   try {
-    const { phone } = await request.json();
+    const { email } = await request.json();
 
-    if (!phone) {
-      return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     const supabase = createServerSupabaseClient();
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    const { error } = await supabase.auth.signInWithOtp({ email });
 
     if (error) {
       console.error('[send-otp] Supabase error:', error.message);

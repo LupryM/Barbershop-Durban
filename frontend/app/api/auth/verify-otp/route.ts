@@ -3,17 +3,17 @@ import { createServerSupabaseClient } from '@/lib/supabase/client';
 
 export async function POST(request: NextRequest) {
   try {
-    const { phone, code, name } = await request.json();
+    const { email, code, name } = await request.json();
 
-    if (!phone || !code) {
-      return NextResponse.json({ error: 'Phone and code required' }, { status: 400 });
+    if (!email || !code) {
+      return NextResponse.json({ error: 'Email and code required' }, { status: 400 });
     }
 
     const supabase = createServerSupabaseClient();
     const { data, error } = await supabase.auth.verifyOtp({
-      phone,
+      email,
       token: code,
-      type: 'sms',
+      type: 'email',
     });
 
     if (error) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const user = data.user
       ? {
           id: data.user.id,
-          phone,
+          email,
           name: profile?.full_name ?? name ?? '',
           role: profile?.role ?? 'customer',
         }

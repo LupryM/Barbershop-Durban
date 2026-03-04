@@ -7,10 +7,10 @@
  * Step 2  Date & time selection
  * Step 3  Identity gate
  *   3a  choose   → "Sign in" or "Continue as guest"
- *   3b  phone    → enter phone for OTP
+ *   3b  email    → enter email for OTP
  *   3c  otp      → enter 6-digit code
  *   3d  name     → new user: enter name
- *   3e  guest    → name + phone, no account
+ *   3e  guest    → name + phone/email, no account
  * Step 4  Confirmation
  */
 
@@ -23,7 +23,7 @@ import {
   CheckCircle,
   ArrowRight,
   ChevronLeft,
-  Phone,
+  Mail,
   LogIn,
   UserCheck,
   Scissors,
@@ -45,8 +45,8 @@ interface Haircut {
   image_url: string | null;
 }
 
-type AuthMode   = "choose" | "phone" | "otp" | "name" | "guest";
-type BookerInfo = { name: string; phone: string; isGuest: boolean };
+type AuthMode   = "choose" | "email" | "otp" | "name" | "guest";
+type BookerInfo = { name: string; email: string; isGuest: boolean };
 
 const timeSlots = [
   "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -140,11 +140,11 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
 
   // Auth-gate sub-state
   const [authMode, setAuthMode]   = useState<AuthMode>("choose");
-  const [phone, setPhone]         = useState("");
+  const [email, setEmail]         = useState("");
   const [otp, setOtp]             = useState("");
   const [newName, setNewName]     = useState("");
   const [guestName, setGuestName] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
 
   const [booker, setBooker] = useState<BookerInfo | null>(null);
@@ -171,14 +171,17 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   // ── OTP / Auth helpers ────────────────────────────────────────────────────
 
   const handleSendOtp = async () => {
-    if (!phone.trim()) return;
+    if (!email.trim() || !email.includes('@')) return;
     setAuthLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: phone.trim() });
+      const { error } = await supabase.auth.signInWithOtp({ 
+        email: email.trim(),
+        options: { shouldCreateUser: true }
+      });
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success(`Code sent to ${phone}`);
+        toast.success(`Code sent to ${email}`);
         setAuthMode("otp");
       }
     } catch {
@@ -193,9 +196,9 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
     setAuthLoading(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({
-        phone: phone.trim(),
+        email: email.trim(),
         token: otp,
-        type: "sms",
+        type: "email",
       });
 
       if (error) {
@@ -215,7 +218,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
         const loggedInUser: AuthUser = {
           id: data.user!.id,
           name: profile.full_name,
-          phone: phone.trim(),
+          email: email.trim(),
           role: profile.role ?? "customer",
           accessToken: data.session?.access_token,
         };
@@ -249,7 +252,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
       const loggedInUser: AuthUser = {
         id: authUser.id,
         name: newName.trim(),
-        phone: phone.trim(),
+        email: email.trim(),
         role: "customer",
         accessToken: session?.access_token,
       };
@@ -264,8 +267,8 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   };
 
   const handleGuestContinue = () => {
-    if (!guestName.trim() || !guestPhone.trim()) return;
-    setBooker({ name: guestName.trim(), phone: guestPhone.trim(), isGuest: true });
+    if (!guestName.trim() || !guestEmail.trim()) return;
+    setBooker({ name: guestName.trim(), email: guestEmail.trim(), isGuest: true });
     goNext();
   };
 
@@ -482,7 +485,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                         <UserCheck className="w-5 h-5 text-black/40 flex-shrink-0" />
                         <div>
                           <p className="text-sm font-medium text-black">{user.name}</p>
-                          <p className="text-xs text-black/40">{user.phone}</p>
+                          <p className="text-xs text-black/40">{user.email || user.phone}</p>
                         </div>
                       </div>
                       <button
@@ -511,7 +514,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           </p>
                           <div className="grid sm:grid-cols-2 gap-4">
                             <button
-                              onClick={() => setAuthMode("phone")}
+                              onClick={() => setAuthMode("email")}
                               className="border-2 border-black p-6 text-left hover:bg-black hover:text-white transition-all group"
                             >
                               <LogIn className="w-6 h-6 mb-3 text-black group-hover:text-white transition-colors" />
@@ -527,39 +530,39 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                               <User className="w-6 h-6 mb-3 text-black/40 group-hover:text-black transition-colors" />
                               <p className="font-semibold text-sm mb-1">Continue as guest</p>
                               <p className="text-xs text-black/40 group-hover:text-black/60 transition-colors leading-relaxed">
-                                Book without an account. We'll confirm by WhatsApp or phone.
+                                Book without an account. We'll send booking details to your email.
                               </p>
                             </button>
                           </div>
                         </motion.div>
                       )}
 
-                      {authMode === "phone" && (
+                      {authMode === "email" && (
                         <motion.div
-                          key="gate-phone"
+                          key="gate-email"
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <StepHeader onBack={() => setAuthMode("choose")} title="Enter Your Number" />
+                          <StepHeader onBack={() => setAuthMode("choose")} title="Enter Your Email" />
                           <p className="text-sm text-black/50 mb-8 text-center">
                             We'll send a one-time code to verify it's you.
                           </p>
                           <div className="space-y-4 max-w-sm mx-auto">
                             <div className="space-y-2">
-                              <label htmlFor="booking-phone" className="text-xs uppercase tracking-widest text-black/40 font-medium">
-                                Phone Number
+                              <label htmlFor="booking-email" className="text-xs uppercase tracking-widest text-black/40 font-medium">
+                                Email Address
                               </label>
                               <div className="relative">
-                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
-                                  id="booking-phone"
-                                  autoComplete="tel"
-                                  type="tel"
-                                  value={phone}
-                                  onChange={(e) => setPhone(e.target.value)}
-                                  placeholder="+27 67 886 4334"
+                                  id="booking-email"
+                                  autoComplete="email"
+                                  type="email"
+                                  value={email}
+                                  onChange={(e) => setEmail(e.target.value)}
+                                  placeholder="you@example.com"
                                   className="w-full pl-12 pr-4 py-4 border-2 border-black/10 focus:border-black focus:outline-none transition-all bg-white text-black"
                                   onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
                                 />
@@ -567,7 +570,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                             </div>
                             <button
                               onClick={handleSendOtp}
-                              disabled={!phone.trim() || authLoading}
+                              disabled={!email.trim() || !email.includes('@') || authLoading}
                               className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-all"
                             >
                               {authLoading ? "Sending…" : "Send Code"}
@@ -584,9 +587,9 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <StepHeader onBack={() => setAuthMode("phone")} title="Enter the Code" />
+                          <StepHeader onBack={() => setAuthMode("email")} title="Enter the Code" />
                           <p className="text-sm text-black/50 mb-8 text-center">
-                            Code sent to {phone}.
+                            Code sent to {email}.
                           </p>
                           <div className="space-y-4 max-w-sm mx-auto">
                             <div className="space-y-2">
@@ -614,10 +617,10 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                               {authLoading ? "Verifying…" : "Verify Code"}
                             </button>
                             <button
-                              onClick={() => { setOtp(""); setAuthMode("phone"); }}
+                              onClick={() => { setOtp(""); setAuthMode("email"); }}
                               className="w-full text-xs text-black/40 hover:text-black transition-colors py-2"
                             >
-                              Wrong number? Go back
+                              Wrong email? Go back
                             </button>
                           </div>
                         </motion.div>
@@ -692,23 +695,23 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <label htmlFor="guest-phone" className="text-xs uppercase tracking-widest text-black/40 font-medium">Phone Number</label>
+                              <label htmlFor="guest-email" className="text-xs uppercase tracking-widest text-black/40 font-medium">Email Address</label>
                               <div className="relative">
-                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                                 <input
-                                  id="guest-phone"
-                                  autoComplete="tel"
-                                  type="tel"
-                                  value={guestPhone}
-                                  onChange={(e) => setGuestPhone(e.target.value)}
-                                  placeholder="+27 67 886 4334"
+                                  id="guest-email"
+                                  autoComplete="email"
+                                  type="email"
+                                  value={guestEmail}
+                                  onChange={(e) => setGuestEmail(e.target.value)}
+                                  placeholder="you@example.com"
                                   className="w-full pl-12 pr-4 py-4 border-2 border-black/10 focus:border-black focus:outline-none transition-all bg-white text-black"
                                 />
                               </div>
                             </div>
                             <button
                               onClick={handleGuestContinue}
-                              disabled={!guestName.trim() || !guestPhone.trim()}
+                              disabled={!guestName.trim() || !guestEmail.trim()}
                               className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-all mt-2"
                             >
                               Confirm Appointment
@@ -746,7 +749,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                         } at ${selectedTime} is confirmed.`
                       : `Thanks, ${booker?.name ?? ""}. We've received your request for ${selectedService?.name} on ${
                           selectedDate ? format(selectedDate, "EEE, MMM d") : ""
-                        }. We'll confirm via WhatsApp or call to ${booker?.phone ?? ""}.`}
+                        }. We've sent a confirmation to ${booker?.email ?? ""}.`}
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -771,10 +774,11 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                         setSelectedService(null);
                         setSelectedTime(null);
                         setPhone("");
+                        setEmail("");
                         setOtp("");
                         setNewName("");
                         setGuestName("");
-                        setGuestPhone("");
+                        setGuestEmail("");
                         setBooker(null);
                         setAuthMode("choose");
                       }}
