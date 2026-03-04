@@ -15,5 +15,16 @@
         public string? YocoPaymentId { get; set; }
         public decimal? AmountPaid { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+
+        public int RescheduleCount { get; set; } = 0;
+
+        // Policy: Store final price after discounts or late fees
+        public decimal TotalPrice { get; set; }
+
+        // Policy: Discounts may not be redeemed simultaneously
+        public string? AppliedDiscountCode { get; set; }
+
+
     }
 }

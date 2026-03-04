@@ -2,40 +2,24 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Return mock barbers data
-    const barbers = [
-      {
-        id: 1,
-        name: 'Thabo Mkhize',
-        phone: '+27821111111',
-        specialty: 'Master Barber',
-        experience: '10+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      },
-      {
-        id: 2,
-        name: 'Sipho Nkosi',
-        phone: '+27822222222',
-        specialty: 'Fade Specialist',
-        experience: '7+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      },
-      {
-        id: 3,
-        name: 'Mandla Dlamini',
-        phone: '+27823333333',
-        specialty: 'Beard Expert',
-        experience: '8+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      }
-    ];
+    // This pulls the URL from the .env.local file you just created
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+    // This calls the "GetBarbers" method in your C# BarbersController
+    const response = await fetch(`${backendUrl}/api/barbers`, {
+      cache: 'no-store' // Ensures you always get the latest data
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch barbers from backend');
+    }
+
+    const barbers = await response.json();
+    
+    // Send the real database data back to your frontend UI
     return NextResponse.json({ barbers });
   } catch (error) {
-    console.error('[v0] Get barbers error:', error);
-    return NextResponse.json({ error: 'Failed to fetch barbers' }, { status: 500 });
+    console.error('Connection error:', error);
+    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
   }
 }

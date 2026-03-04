@@ -1,5 +1,6 @@
 "use client";
 
+
 /**
  * BookingSystem — 4-step booking wizard
  *
@@ -16,7 +17,7 @@
  * TODO: Supabase wiring is marked inline.
  */
 
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Calendar as CalendarIcon,
@@ -37,21 +38,13 @@ import Link from "next/link";
 import { useAuth, type AuthUser } from "@/context/auth-context";
 
 // ─── Static data ──────────────────────────────────────────────────────────────
+//FETCH HAIRCUTS FROM SUPABASE BACKEND
+const [services,setServices] = [useState<any[]>([});
+const [loading,setloading] = [useState(true)];
 
-const services = [
-  { id: 1,  name: "Normal Haircut",         description: "XCLUSIVE haircut",           price: "R100", duration: "30 min" },
-  { id: 2,  name: "Haircut with Dye",        description: "XCLUSIVE haircut with dye",  price: "R150", duration: "45 min" },
-  { id: 3,  name: "Full House",              description: "With dye and fibre",          price: "R180", duration: "60 min" },
-  { id: 4,  name: "Clipper Chiskop",         description: "XCLUSIVE bald cut",           price: "R60",  duration: "20 min" },
-  { id: 5,  name: "Razor Blade Chiskop",     description: "XCLUSIVE bald cut",           price: "R70",  duration: "30 min" },
-  { id: 6,  name: "Hair Colouring – Black",  description: "XCLUSIVE hair colouring",     price: "R100", duration: "45 min" },
-  { id: 7,  name: "Hair Colouring – Blond",  description: "XCLUSIVE hair colouring",     price: "R100", duration: "45 min" },
-  { id: 8,  name: "Hair Colouring – White",  description: "XCLUSIVE hair colouring",     price: "R200", duration: "60 min" },
-  { id: 9,  name: "Beard Shave",             description: "XCLUSIVE beard service",      price: "R20",  duration: "15 min" },
-  { id: 10, name: "Beard with Dye",          description: "XCLUSIVE beard service",      price: "R50",  duration: "30 min" },
-  { id: 11, name: "Straight Line Design",    description: "XCLUSIVE design",             price: "R20",  duration: "10 min" },
-  { id: 12, name: "Hectic Design",           description: "Any hectic design",           price: "R100", duration: "30 min" },
-];
+
+
+
 
 const timeSlots = [
   "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
