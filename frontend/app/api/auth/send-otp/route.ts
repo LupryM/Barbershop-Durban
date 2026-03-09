@@ -1,32 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
+/**
+ * POST /api/auth/send-otp
+ * Send OTP to email via Supabase Auth
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { phone } = await request.json();
+    const { email } = await request.json();
 
-    if (!phone) {
-      return NextResponse.json(
-        { error: 'Phone number is required' },
-        { status: 400 }
-      );
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Generate 6-digit OTP (mock - database disabled)
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    console.log(`[v0] Mock OTP for ${phone}: ${code}`);
+    if (!email.includes('@')) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
 
-    return NextResponse.json({ 
-      success: true,
-      message: 'OTP sent successfully',
-      // Include code for testing (no real SMS or database)
-      code
-    });
-  } catch (error) {
-    console.error('[v0] Send OTP error:', error);
-    return NextResponse.json(
-      { error: 'Failed to send OTP' },
-      { status: 500 }
-    );
+    const { error } = await supabase.auth.signInWithOtp({ email });
+
+    if (error) {
+      console.error('[auth] Send OTP error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: 'OTP sent to email' });
+  } catch (err) {
+    console.error('[auth] Send OTP error:', err);
+    return NextResponse.json({ error: 'Failed to send OTP' }, { status: 500 });
   }
 }

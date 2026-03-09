@@ -1,43 +1,29 @@
 "use client";
 
 /**
- * Login Page
+ * Login Page — Email OTP with Supabase
  *
- * Customer flow  → phone number → OTP → (new: enter name) → redirect
- * Staff access   → shown via "Staff Portal" link (dev only)
- *
- * TODO: Supabase
- * - handleSendOtp   → supabase.auth.signInWithOtp({ phone })
- * - handleVerifyOtp → supabase.auth.verifyOtp({ phone, token, type: 'sms' })
- *   then fetch/create row in `profiles` table
+ * Customer flow:  email → OTP → (new: name) → dashboard
+ * Staff flow:     email → OTP → check role → dashboard
  */
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  Phone,
+  Mail,
+  Lock,
   User,
-  ShieldCheck,
   ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth, type AuthUser, type UserRole } from "@/context/auth-context";
+import { sendOtp, verifyOtp, getProfile, createProfile } from "@/lib/supabase-auth";
 
-// ─── OTP code helper ──────────────────────────────────────────────────────────
-
-function sendMockOtp(phone: string): string {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  toast.info(`OTP for ${phone}: ${code}`, {
-    description: "Test code — replace with real SMS (Supabase Auth) in production.",
-    duration: 30000,
-  });
-  return code;
-}
-
-// ─── Main component (wraps content in Suspense for useSearchParams) ──────────
+// ─── Main wrapper ─────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
   return (
@@ -47,103 +33,186 @@ export default function LoginPage() {
   );
 }
 
-// ─── Inner content ────────────────────────────────────────────────────────────
+// ─── Content ──────────────────────────────────────────────────────────────────
 
 type LoginMode = "customer" | "staff";
-type Step      = "entry" | "otp" | "name";
+type Step = "email" | "otp" | "name";
 
 function LoginContent() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo     = searchParams.get("returnTo") ?? "/dashboard";
-  const { login }    = useAuth();
+  const returnTo = searchParams.get("returnTo") ?? "/dashboard";
+  const { login } = useAuth();
 
-  // Which portal
+  // Mode
   const [mode, setMode] = useState<LoginMode>("customer");
 
   // Customer OTP flow
-  const [step, setStep]       = useState<Step>("entry");
-  const [phone, setPhone]     = useState("");
-  const [otp, setOtp]         = useState("");
-  const [_mockOtp, setMockOtp] = useState("");
-  const [newName, setNewName] = useState("");
+  const [step, setStep] = useState<Step>("email");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null);
 
-  // Staff form (dev only)
-  const [staffName, setStaffName] = useState("");
-  const [staffRole, setStaffRole] = useState<UserRole>("barber");
+  // Staff flow
+  const [staffEmail, setStaffEmail] = useState("");
+  const [staffPassword, setStaffPassword] = useState("");
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffError, setStaffError] = useState<string | null>(null);
 
-  // ── Customer flow ────────────────────────────────────────────────────────
+  // ─ Customer flow ──────────────────────────────────────────────────────────
 
-  const handleSendOtp = () => {
-    if (!phone.trim()) { toast.error("Enter a phone number"); return; }
+  const handleSendOtp = async () => {
+    if (!email.trim()) {
+      setError("Please enter your email");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+
+    setError(null);
     setLoading(true);
-    // TODO: Supabase → supabase.auth.signInWithOtp({ phone })
-    const code = sendMockOtp(phone);
-    setMockOtp(code);
-    setTimeout(() => { setLoading(false); setStep("otp"); }, 600);
+
+    try {
+      await sendOtp({ email });
+      setStep("otp");
+      toast.success("Code sent! Check your email.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send code";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.length < 6) { toast.error("Enter the 6-digit code"); return; }
-    setLoading(true);
-    // TODO: Supabase → supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
-    //   then check `profiles` table; if no row → ask for name (step = "name")
-    setTimeout(() => {
-      setLoading(false);
-      const existingProfile = typeof window !== "undefined"
-        ? localStorage.getItem(`xclusiveProfile:${phone}`)
-        : null;
+  const handleVerifyOtp = async () => {
+    if (otp.length < 6) {
+      setError("Please enter the 6-digit code");
+      return;
+    }
 
-      if (existingProfile) {
-        const profile = JSON.parse(existingProfile) as { name: string };
-        finaliseLogin({ id: `mock-${Date.now()}`, name: profile.name, phone, role: "customer" });
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { user, session } = await verifyOtp({ email, token: otp });
+
+      // Store session token (for API calls)
+      if (session?.access_token) {
+        localStorage.setItem("supabaseToken", session.access_token);
+      }
+
+      setSupabaseUserId(user.id);
+
+      // Check if profile exists
+      const profile = await getProfile(user.id);
+
+      if (profile) {
+        // Existing user
+        const userData: AuthUser = {
+          id: user.id,
+          email,
+          name: profile.full_name || email.split("@")[0],
+          role: profile.role || "customer",
+        };
+        login(userData);
+        toast.success(`Welcome back, ${userData.name}!`);
+        router.push(returnTo);
       } else {
+        // New user — ask for name
         setStep("name");
       }
-    }, 700);
-  };
-
-  const handleSaveName = () => {
-    if (!newName.trim()) { toast.error("Please enter your name"); return; }
-    // TODO: Supabase → upsert into `profiles` (id, name, phone, role: 'customer')
-    localStorage.setItem(`xclusiveProfile:${phone}`, JSON.stringify({ name: newName.trim() }));
-    finaliseLogin({ id: `mock-${Date.now()}`, name: newName.trim(), phone, role: "customer" });
-  };
-
-  const finaliseLogin = (userData: AuthUser) => {
-    login(userData);
-    toast.success(`Welcome, ${userData.name}!`);
-    router.push(returnTo);
-  };
-
-  // ── Staff flow (dev / internal) ──────────────────────────────────────────
-
-  const handleStaffLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!staffName.trim()) { toast.error("Enter your name"); return; }
-    setLoading(true);
-    // TODO: Supabase → staff log in via email/password, check `profiles`.role
-    setTimeout(() => {
-      login({ id: `staff-${Date.now()}`, name: staffName.trim(), phone: "", role: staffRole });
-      toast.success(`Welcome, ${staffName.trim()}!`);
-      router.push("/dashboard");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Invalid code";
+      setError(message);
+      toast.error(message);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  const handleSaveName = async () => {
+    if (!name.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+
+    if (!supabaseUserId) {
+      setError("Session error — please try again");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Create profile in Supabase
+      await createProfile({
+        id: supabaseUserId,
+        email,
+        name: name.trim(),
+        role: "customer",
+      });
+
+      const userData: AuthUser = {
+        id: supabaseUserId,
+        email,
+        name: name.trim(),
+        role: "customer",
+      };
+
+      login(userData);
+      toast.success(`Welcome, ${userData.name}!`);
+      router.push(returnTo);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create account";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─ Staff flow ─────────────────────────────────────────────────────────────
+  // Note: For production, implement proper staff email/password auth via Supabase
+
+  const handleStaffLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!staffEmail.trim() || !staffPassword.trim()) {
+      setStaffError("Email and password required");
+      return;
+    }
+
+    setStaffError(null);
+    setStaffLoading(true);
+
+    try {
+      // TODO: Implement real staff authentication
+      // For now, show placeholder
+      toast.error("Staff login requires Supabase configuration");
+    } finally {
+      setStaffLoading(false);
+    }
+  };
+
+  // ─ Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Toaster position="top-center" expand richColors />
 
-      {/* Nav */}
+      {/* Header */}
       <nav className="bg-black py-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 flex items-center justify-center">
-              <img src="/logo.png" alt="Xclusive Barber Logo" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="Xclusive Barber" className="w-full h-full object-contain" />
             </div>
             <span className="text-xl md:text-2xl font-semibold tracking-tight text-white font-montserrat">
               XCLUSIVE BARBER
@@ -151,25 +220,25 @@ function LoginContent() {
           </Link>
           <Link
             href={returnTo.startsWith("/") && returnTo !== "/dashboard" ? returnTo : "/"}
-            className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat"
+            className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors font-semibold"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </Link>
         </div>
       </nav>
 
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-20">
+      {/* Main */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
 
-          {/* Mode switcher (only shown when in customer mode — staff link at bottom) */}
+          {/* CUSTOMER MODE */}
           {mode === "customer" && (
             <AnimatePresence mode="wait">
 
-              {/* Step: phone entry */}
-              {step === "entry" && (
+              {/* Email Step */}
+              {step === "email" && (
                 <motion.div
-                  key="entry"
+                  key="email"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -182,32 +251,47 @@ function LoginContent() {
                     <h1 className="text-4xl md:text-5xl font-light tracking-tight text-black mb-4">
                       Sign In
                     </h1>
-                    <p className="text-black/50 text-sm leading-relaxed">
-                      Enter your phone number and we'll send a verification code.
+                    <p className="text-black/50 text-sm leading-relaxed max-w-xs mx-auto">
+                      Enter your email and we'll send a verification code.
                     </p>
                   </div>
 
                   <div className="space-y-4">
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded"
+                      >
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700">{error}</p>
+                      </motion.div>
+                    )}
+
                     <div className="space-y-2">
                       <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
-                        Phone Number
+                        Email Address
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                         <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+27 67 886 4334"
+                          type="email"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError(null);
+                          }}
+                          placeholder="you@example.com"
                           className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
-                          onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                          onKeyDown={(e) => e.key === "Enter" && !loading && handleSendOtp()}
+                          disabled={loading}
                         />
                       </div>
                     </div>
 
                     <button
                       onClick={handleSendOtp}
-                      disabled={!phone.trim() || loading}
+                      disabled={!email.trim() || loading}
                       className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {loading ? "Sending…" : (
@@ -218,13 +302,13 @@ function LoginContent() {
 
                   <div className="mt-8 text-center">
                     <p className="text-xs text-black/30">
-                      No account needed — we'll create one automatically.
+                      New here? We'll create an account automatically.
                     </p>
                   </div>
                 </motion.div>
               )}
 
-              {/* Step: OTP verification */}
+              {/* OTP Step */}
               {step === "otp" && (
                 <motion.div
                   key="otp"
@@ -241,18 +325,33 @@ function LoginContent() {
                       Enter Code
                     </h1>
                     <p className="text-black/50 text-sm leading-relaxed">
-                      Code sent to <strong>{phone}</strong>.{" "}
+                      We sent a code to <strong>{email}</strong>
+                      <br />
                       <button
-                        onClick={() => { setStep("entry"); setOtp(""); }}
-                        className="underline text-black/50 hover:text-black transition-colors"
+                        onClick={() => {
+                          setStep("email");
+                          setOtp("");
+                          setError(null);
+                        }}
+                        className="mt-2 underline text-black/50 hover:text-black transition-colors text-xs"
                       >
-                        Change
+                        Wrong email?
                       </button>
                     </p>
-                    <p className="text-black/30 text-xs mt-2">(Check the notification at the top for the test code.)</p>
                   </div>
 
                   <div className="space-y-4">
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded"
+                      >
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700">{error}</p>
+                      </motion.div>
+                    )}
+
                     <div className="space-y-2">
                       <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
                         6-digit code
@@ -262,10 +361,14 @@ function LoginContent() {
                         inputMode="numeric"
                         maxLength={6}
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                        onChange={(e) => {
+                          setOtp(e.target.value.replace(/\D/g, ""));
+                          setError(null);
+                        }}
                         placeholder="000000"
                         className="w-full text-center text-2xl tracking-[0.5em] py-4 border-2 border-black/10 focus:border-black focus:outline-none transition-all bg-white text-black"
-                        onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                        onKeyDown={(e) => e.key === "Enter" && otp.length === 6 && !loading && handleVerifyOtp()}
+                        disabled={loading}
                       />
                     </div>
 
@@ -279,7 +382,8 @@ function LoginContent() {
 
                     <button
                       onClick={handleSendOtp}
-                      className="w-full text-xs text-black/40 hover:text-black transition-colors py-2"
+                      disabled={loading}
+                      className="w-full text-xs text-black/40 hover:text-black transition-colors py-2 disabled:opacity-50"
                     >
                       Resend code
                     </button>
@@ -287,7 +391,7 @@ function LoginContent() {
                 </motion.div>
               )}
 
-              {/* Step: new user name */}
+              {/* Name Step (New User) */}
               {step === "name" && (
                 <motion.div
                   key="name"
@@ -303,35 +407,52 @@ function LoginContent() {
                     <h1 className="text-4xl font-light tracking-tight text-black mb-4">
                       What's Your Name?
                     </h1>
-                    <p className="text-black/50 text-sm leading-relaxed">
-                      Just so we know who to expect at the chair.
+                    <p className="text-black/50 text-sm leading-relaxed max-w-xs mx-auto">
+                      We'll use this to recognize you in our system.
                     </p>
                   </div>
 
                   <div className="space-y-4">
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded"
+                      >
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700">{error}</p>
+                      </motion.div>
+                    )}
+
                     <div className="space-y-2">
                       <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
-                        Your Name
+                        Full Name
                       </label>
                       <div className="relative">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                         <input
                           type="text"
-                          value={newName}
-                          onChange={(e) => setNewName(e.target.value)}
-                          placeholder="e.g. Thabo"
+                          value={name}
+                          onChange={(e) => {
+                            setName(e.target.value);
+                            setError(null);
+                          }}
+                          placeholder="e.g. Thabo Dlamini"
                           className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
-                          onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+                          onKeyDown={(e) => e.key === "Enter" && !loading && handleSaveName()}
+                          disabled={loading}
                         />
                       </div>
                     </div>
 
                     <button
                       onClick={handleSaveName}
-                      disabled={!newName.trim()}
+                      disabled={!name.trim() || loading}
                       className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      Create Account <ChevronRight className="w-4 h-4" />
+                      {loading ? "Creating…" : (
+                        <>Create Account <ChevronRight className="w-4 h-4" /></>
+                      )}
                     </button>
                   </div>
                 </motion.div>
@@ -340,7 +461,7 @@ function LoginContent() {
             </AnimatePresence>
           )}
 
-          {/* Staff portal */}
+          {/* STAFF MODE */}
           {mode === "staff" && (
             <motion.div
               key="staff"
@@ -356,57 +477,83 @@ function LoginContent() {
                   Staff Sign In
                 </h1>
                 <p className="text-black/50 text-sm leading-relaxed">
-                  For barbers and admin only.
+                  Barbers and admins only.
                 </p>
               </div>
 
-              <form onSubmit={handleStaffLogin} className="space-y-6">
+              <form onSubmit={handleStaffLogin} className="space-y-4">
+                {staffError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-3 p-4 bg-red-50 border-2 border-red-200 rounded"
+                  >
+                    <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-red-700">{staffError}</p>
+                  </motion.div>
+                )}
+
                 <div className="space-y-2">
-                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">Name</label>
+                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
+                    Email
+                  </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                     <input
-                      type="text"
-                      value={staffName}
-                      onChange={(e) => setStaffName(e.target.value)}
-                      placeholder="Your name"
+                      type="email"
+                      value={staffEmail}
+                      onChange={(e) => {
+                        setStaffEmail(e.target.value);
+                        setStaffError(null);
+                      }}
+                      placeholder="you@xclusive.co.za"
                       className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
+                      disabled={staffLoading}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">Role</label>
+                  <label className="block text-xs uppercase tracking-widest text-black/40 font-medium">
+                    Password
+                  </label>
                   <div className="relative">
-                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
-                    <select
-                      value={staffRole}
-                      onChange={(e) => setStaffRole(e.target.value as UserRole)}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black focus:border-black focus:outline-none transition-all bg-white appearance-none"
-                    >
-                      <option value="barber">Barber</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                    <input
+                      type="password"
+                      value={staffPassword}
+                      onChange={(e) => {
+                        setStaffPassword(e.target.value);
+                        setStaffError(null);
+                      }}
+                      placeholder="••••••••"
+                      className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
+                      disabled={staffLoading}
+                    />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={staffLoading}
                   className="w-full bg-accent text-accent-foreground py-4 font-medium text-sm uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Signing in…" : "Sign In"}
+                  {staffLoading ? "Signing in…" : "Sign In"}
                 </button>
               </form>
+
+              <div className="mt-6 p-4 bg-black/5 rounded text-xs text-black/50 text-center">
+                Contact your admin for staff account setup.
+              </div>
             </motion.div>
           )}
 
-          {/* Footer row */}
+          {/* Footer */}
           <div className="mt-12 pt-8 border-t border-black/5 flex items-center justify-between">
             <p className="text-[11px] uppercase tracking-[0.2em] text-black/30">
               Need help?{" "}
               <a href="tel:+27678864334" className="text-black/50 hover:text-black transition-colors">
-                +27 67 886 4334
+                +27 678 86 433
               </a>
             </p>
             <button
@@ -416,6 +563,7 @@ function LoginContent() {
               {mode === "customer" ? "Staff Portal →" : "← Customer"}
             </button>
           </div>
+
         </div>
       </div>
     </div>

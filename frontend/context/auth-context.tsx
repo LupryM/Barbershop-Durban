@@ -1,20 +1,13 @@
 "use client";
 
 /**
- * Auth Context
+ * Auth Context — Email-based OTP with Supabase
  *
- * Current implementation: localStorage-based (development/prototype).
- *
- * TODO: Supabase integration
- * ---------------------------------
- * 1. Install: npm install @supabase/supabase-js @supabase/ssr
- * 2. Create lib/supabase/client.ts with createBrowserClient()
- * 3. Replace the useEffect below with supabase.auth.getSession()
- * 4. Replace login() with supabase.auth.signInWithOtp({ phone })
- * 5. Replace logout() with supabase.auth.signOut()
- * 6. Listen to auth changes via supabase.auth.onAuthStateChange()
- * 7. The user profile (name, role) lives in a `profiles` table linked to auth.users
- * ---------------------------------
+ * Handles:
+ * - User login via email OTP
+ * - Session management
+ * - Profile data from Supabase
+ * - Logout and session cleanup
  */
 
 import React, {
@@ -30,23 +23,19 @@ import React, {
 export type UserRole = "customer" | "barber" | "admin";
 
 export interface AuthUser {
-  /** TODO: Supabase — map to auth.users.id */
-  id: string;
-  name: string;
-  /** Phone used for OTP / contact */
-  phone: string;
-  role: UserRole;
+  id: string; // Supabase auth.users.id
+  email: string; // Primary identifier (email OTP)
+  name: string; // Full name
+  role: UserRole; // Role type
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  /** True while we're reading the stored session on first load */
   isLoading: boolean;
   isLoggedIn: boolean;
   login: (user: AuthUser) => void;
   logout: () => void;
-  /** Update name/phone after initial sign-up without a full re-login */
-  updateUser: (partial: Partial<Pick<AuthUser, "name" | "phone">>) => void;
+  updateUser: (partial: Partial<Pick<AuthUser, "name">>) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -61,37 +50,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hydrate from storage on mount
+  // Initialize from localStorage on mount
   useEffect(() => {
-    // TODO: Supabase — replace this block with:
-    //   const { data: { session } } = await supabase.auth.getSession()
-    //   if (session) { /* fetch profile from `profiles` table */ setUser(profile) }
-    //   supabase.auth.onAuthStateChange((_event, session) => { ... })
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Validate shape (basic check)
+        if (parsed.id && parsed.email && parsed.name) {
+          setUser(parsed);
+        }
       }
-    } catch {
-      // Corrupt storage — ignore
+    } catch (e) {
+      // Corrupt or invalid stored data — ignore silently
+      localStorage.removeItem(STORAGE_KEY);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const login = (userData: AuthUser) => {
-    // TODO: Supabase — session is managed by Supabase SDK; just sync local state here
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    // TODO: Supabase — await supabase.auth.signOut()
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
   };
 
-  const updateUser = (partial: Partial<Pick<AuthUser, "name" | "phone">>) => {
+  const updateUser = (partial: Partial<Pick<AuthUser, "name">>) => {
     if (!user) return;
     const updated = { ...user, ...partial };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
