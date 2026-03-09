@@ -1,46 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
+/**
+ * POST /api/auth/verify-otp
+ * Verify OTP token and get session via Supabase Auth
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { phone, code, name } = await request.json();
+    const { email, token } = await request.json();
 
-    if (!phone || !code) {
-      return NextResponse.json(
-        { error: 'Phone and code required' },
-        { status: 400 }
-      );
+    if (!email || !token) {
+      return NextResponse.json({ error: 'Email and token required' }, { status: 400 });
     }
 
-    // Mock verification - accept any code (database disabled)
-    console.log(`[v0] Mock verification for ${phone} with code ${code}`);
-
-    // Mock user data
-    const user = {
-      id: 1,
-      phone,
-      name: name || 'Guest User',
-      role: 'customer'
-    };
-
-    // Set mock session cookie
-    const response = NextResponse.json({
-      success: true,
-      user
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
     });
 
-    response.cookies.set('session', 'mock-session-id', {
+    if (error) {
+      console.error('[auth] Verify OTP error:', error);
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+
+    if (!data.session || !data.user) {
+      return NextResponse.json({ error: 'Session creation failed' }, { status: 500 });
+    }
+
+    // Set session cookie with the access token
+    const response = NextResponse.json({
+      success: true,
+      session: {
+        access_token: data.session.access_token,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+        },
+      },
+    });
+
+    // Store token in httpOnly cookie for secure access
+    response.cookies.set('supabaseToken', data.session.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
     return response;
-  } catch (error) {
-    console.error('[v0] Verify OTP error:', error);
-    return NextResponse.json(
-      { error: 'Failed to verify OTP' },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error('[auth] Verify OTP error:', err);
+    return NextResponse.json({ error: 'Failed to verify OTP' }, { status: 500 });
   }
 }

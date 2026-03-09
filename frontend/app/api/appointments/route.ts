@@ -1,60 +1,96 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
-// GET - Get appointments (mock data - database disabled)
+// GET - Fetch appointments with customer, barber and service info
 export async function GET(request: NextRequest) {
   try {
-    // Return empty appointments array
-    return NextResponse.json({ appointments: [] });
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get('date');
+
+    let query = supabase
+      .from('appointments')
+      .select(`
+        id,
+        appointment_date,
+        time_slot,
+        status,
+        payment_status,
+        total_price,
+        created_at,
+        profiles!user_id ( id, full_name, email ),
+        barbers!barber_id ( id, full_name ),
+        haircuts!haircut_id ( id, name, price )
+      `)
+      .order('appointment_date', { ascending: true });
+
+    if (date) {
+      query = query.eq('appointment_date', date);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[supabase] Get appointments error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Normalise to the shape the dashboards expect
+    const appointments = (data ?? []).map((row: any) => ({
+      id: row.id,
+      service_name: row.haircuts?.name ?? 'Unknown Service',
+      service_price: row.total_price != null ? `R${row.total_price}` : (row.haircuts?.price != null ? `R${row.haircuts.price}` : 'N/A'),
+      appointment_date: row.appointment_date,
+      appointment_time: row.time_slot,
+      status: row.status,
+      payment_status: row.payment_status,
+      customer_name: row.profiles?.full_name ?? 'Unknown Customer',
+      customer_email: row.profiles?.email ?? null,
+      customer_id: row.profiles?.id ?? null,
+      barber_name: row.barbers?.full_name ?? 'Unknown Barber',
+      barber_id: row.barbers?.id ?? null,
+      created_at: row.created_at,
+    }));
+
+    return NextResponse.json({ appointments });
   } catch (error) {
-    console.error("[v0] Get appointments error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch appointments" },
-      { status: 500 }
-    );
+    console.error('[supabase] Get appointments error:', error);
+    return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 });
   }
 }
 
-// POST - Create appointment (mock response - database disabled)
+// POST - Create a new appointment
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
-    const {
-      barber_id,
-      service_name,
-      service_price,
-      service_duration,
-      appointment_date,
-      appointment_time,
-    } = data;
+    const body = await request.json();
+    const { user_id, barber_id, haircut_id, appointment_date, appointment_time, total_price } = body;
 
-    // Validate required fields
-    if (!barber_id || !service_name || !appointment_date || !appointment_time) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    if (!user_id || !barber_id || !haircut_id || !appointment_date || !appointment_time) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Return mock success response
-    const appointment = {
-      id: Date.now(),
-      customer_id: 1,
-      barber_id,
-      service_name,
-      service_price,
-      service_duration,
-      appointment_date,
-      appointment_time,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-    };
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert({
+        user_id,
+        barber_id,
+        haircut_id,
+        appointment_date,
+        time_slot: appointment_time,
+        total_price: total_price ?? null,
+        status: 'pending',
+        payment_status: 'unpaid',
+      })
+      .select()
+      .single();
 
-    return NextResponse.json({ success: true, appointment });
+    if (error) {
+      console.error('[supabase] Create appointment error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, appointment: data });
   } catch (error) {
-    console.error("[v0] Create appointment error:", error);
-    return NextResponse.json(
-      { error: "Failed to create appointment" },
-      { status: 500 }
-    );
+    console.error('[supabase] Create appointment error:', error);
+    return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 });
   }
 }
