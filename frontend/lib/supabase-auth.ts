@@ -30,14 +30,10 @@ export interface CreateProfileInput {
  * Send magic link to email via Supabase Auth
  */
 export async function sendOtp(input: SendOtpInput) {
-  // Get the app URL from environment or use current origin
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ||
-    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-
   const { error } = await supabase.auth.signInWithOtp({
     email: input.email,
     options: {
-      emailRedirectTo: `${appUrl}/auth/callback`,
+      shouldCreateUser: true,
     },
   });
 
