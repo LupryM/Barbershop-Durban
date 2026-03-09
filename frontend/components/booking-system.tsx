@@ -3,20 +3,14 @@
 /**
  * BookingSystem — 4-step booking wizard
  *
- * Step 1  Service selection
- * Step 2  Date & time selection
+ * Step 1  Service selection (from Supabase)
+ * Step 2  Date & barber selection
+ * Step 2b Barber & time selection (available slots from Supabase)
  * Step 3  Identity gate  ← smart: skipped/pre-filled if already logged in
- *   3a  choose   → show two paths: "Sign in" or "Continue as guest"
- *   3b  phone    → enter phone for OTP
- *   3c  otp      → enter the 6-digit code
- *   3d  name     → new user: enter their name (phone already known)
- *   3e  guest    → enter name + phone, no account
  * Step 4  Confirmation
- *
- * TODO: Supabase wiring is marked inline.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Calendar as CalendarIcon,
@@ -36,32 +30,31 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useAuth, type AuthUser } from "@/context/auth-context";
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────────────
 
-const services = [
-  { id: 1,  name: "Normal Haircut",         description: "XCLUSIVE haircut",           price: "R100", duration: "30 min" },
-  { id: 2,  name: "Haircut with Dye",        description: "XCLUSIVE haircut with dye",  price: "R150", duration: "45 min" },
-  { id: 3,  name: "Full House",              description: "With dye and fibre",          price: "R180", duration: "60 min" },
-  { id: 4,  name: "Clipper Chiskop",         description: "XCLUSIVE bald cut",           price: "R60",  duration: "20 min" },
-  { id: 5,  name: "Razor Blade Chiskop",     description: "XCLUSIVE bald cut",           price: "R70",  duration: "30 min" },
-  { id: 6,  name: "Hair Colouring – Black",  description: "XCLUSIVE hair colouring",     price: "R100", duration: "45 min" },
-  { id: 7,  name: "Hair Colouring – Blond",  description: "XCLUSIVE hair colouring",     price: "R100", duration: "45 min" },
-  { id: 8,  name: "Hair Colouring – White",  description: "XCLUSIVE hair colouring",     price: "R200", duration: "60 min" },
-  { id: 9,  name: "Beard Shave",             description: "XCLUSIVE beard service",      price: "R20",  duration: "15 min" },
-  { id: 10, name: "Beard with Dye",          description: "XCLUSIVE beard service",      price: "R50",  duration: "30 min" },
-  { id: 11, name: "Straight Line Design",    description: "XCLUSIVE design",             price: "R20",  duration: "10 min" },
-  { id: 12, name: "Hectic Design",           description: "Any hectic design",           price: "R100", duration: "30 min" },
+interface Service {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+}
+
+interface Barber {
+  id: string;
+  name: string;
+  specialty?: string;
+  image_url?: string;
+}
+
+// Default time slots (static fallback)
+const DEFAULT_TIME_SLOTS = [
+  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
+  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+  "17:00", "17:30",
 ];
 
-const timeSlots = [
-  "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-  "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
-  "05:00 PM", "06:00 PM",
-];
+// ─── More Types ──────────────────────────────────────────────────────────────
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type Service    = typeof services[number];
 type AuthMode   = "choose" | "phone" | "otp" | "name" | "guest";
 type BookerInfo = { name: string; phone: string; isGuest: boolean };
 
@@ -151,9 +144,16 @@ function BookingSummaryCard({
 export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   const { user, isLoggedIn, login } = useAuth();
 
+  // Data state
+  const [services, setServices] = useState<Service[]>([]);
+  const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
   // Wizard state
   const [step, setStep]               = useState(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedBarber, setSelectedBarber]   = useState<Barber | null>(null);
   const [selectedDate, setSelectedDate]       = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime]       = useState<string | null>(null);
 
@@ -172,6 +172,64 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
 
   const goNext = () => setStep((s) => s + 1);
   const goPrev = () => setStep((s) => s - 1);
+
+  // Load services and barbers on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [servicesRes, barbersRes] = await Promise.all([
+          fetch("/api/haircuts"),
+          fetch("/api/barbers"),
+        ]);
+
+        if (servicesRes.ok) {
+          const data = await servicesRes.json();
+          setServices(data.haircuts || []);
+        }
+
+        if (barbersRes.ok) {
+          const data = await barbersRes.json();
+          setBarbers(data.barbers || []);
+        }
+      } catch (error) {
+        console.error("Failed to load booking data:", error);
+        toast.error("Failed to load available services");
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Load available time slots when barber and date change
+  useEffect(() => {
+    if (!selectedBarber || !selectedDate) {
+      setAvailableSlots([]);
+      return;
+    }
+
+    const loadSlots = async () => {
+      try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const res = await fetch(
+          `/api/availability?barber_id=${selectedBarber.id}&date=${dateStr}`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setAvailableSlots(data.available_slots || DEFAULT_TIME_SLOTS);
+        } else {
+          setAvailableSlots(DEFAULT_TIME_SLOTS);
+        }
+      } catch (error) {
+        console.error("Failed to load available slots:", error);
+        setAvailableSlots(DEFAULT_TIME_SLOTS);
+      }
+    };
+
+    loadSlots();
+  }, [selectedBarber, selectedDate]);
 
   // ── Step 3 helpers ────────────────────────────────────────────────────────
 
@@ -257,39 +315,32 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
     const bookerName  = isLoggedIn ? user!.name  : booker?.name  ?? "";
     const bookerPhone = isLoggedIn ? user!.phone : booker?.phone ?? "";
 
-    // TODO: Supabase — insert into `appointments` table:
-    // {
-    //   customer_id:   isLoggedIn ? user.id : null,
-    //   customer_name: bookerName,
-    //   customer_phone: bookerPhone,
-    //   service_name:  selectedService!.name,
-    //   service_price: selectedService!.price,
-    //   service_duration: selectedService!.duration,
-    //   appointment_date: format(selectedDate!, 'yyyy-MM-dd'),
-    //   appointment_time: selectedTime,
-    //   status:        'pending',
-    // }
-
     try {
-      await fetch("/api/appointments", {
+      const response = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          service_name:      selectedService!.name,
-          service_price:     selectedService!.price,
-          service_duration:  selectedService!.duration,
-          appointment_date:  selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
-          appointment_time:  selectedTime,
-          customer_name:     bookerName,
-          customer_phone:    bookerPhone,
+          user_id: isLoggedIn ? user!.id : null,
+          barber_id: selectedBarber!.id,
+          haircut_id: selectedService!.id,
+          appointment_date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+          appointment_time: selectedTime,
+          total_price: selectedService!.price,
         }),
       });
-    } catch {
-      // Network error — still show confirmation in dev/test
-    }
 
-    toast.success("Booking confirmed! We'll be in touch shortly.");
-    goNext();
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create appointment");
+        return;
+      }
+
+      toast.success("Booking confirmed! We'll be in touch shortly.");
+      goNext();
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast.error("Failed to create appointment");
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -352,32 +403,38 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                   <h3 className="text-2xl font-semibold mb-8 text-black font-montserrat">
                     Choose a Service
                   </h3>
-                  <div className="grid gap-3">
-                    {services.map((service) => (
-                      <button
-                        key={service.id}
-                        onClick={() => { setSelectedService(service); goNext(); }}
-                        className={`flex items-center justify-between p-5 border-2 text-left transition-all hover:border-black group ${
-                          selectedService?.id === service.id
-                            ? "border-black bg-black/[0.02]"
-                            : "border-black/10"
-                        }`}
-                      >
-                        <div>
-                          <p className="font-medium text-base text-black">{service.name}</p>
-                          <p className="text-xs text-black/40 mt-0.5">{service.description} · {service.duration}</p>
-                        </div>
-                        <div className="text-right flex items-center gap-3">
-                          <p className="font-semibold text-base text-black">{service.price}</p>
-                          <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-black" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  {loadingData ? (
+                    <div className="text-center py-12 text-black/50">Loading services...</div>
+                  ) : services.length === 0 ? (
+                    <div className="text-center py-12 text-black/50">No services available</div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {services.map((service) => (
+                        <button
+                          key={service.id}
+                          onClick={() => { setSelectedService(service); goNext(); }}
+                          className={`flex items-center justify-between p-5 border-2 text-left transition-all hover:border-black group ${
+                            selectedService?.id === service.id
+                              ? "border-black bg-black/[0.02]"
+                              : "border-black/10"
+                          }`}
+                        >
+                          <div>
+                            <p className="font-medium text-base text-black">{service.name}</p>
+                            <p className="text-xs text-black/40 mt-0.5">{service.description || "Haircut service"}</p>
+                          </div>
+                          <div className="text-right flex items-center gap-3">
+                            <p className="font-semibold text-base text-black">R{service.price}</p>
+                            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-black" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
 
-              {/* ─── Step 2: Date & Time ──────────────────────────────── */}
+              {/* ─── Step 2: Barber, Date & Time ──────────────────────── */}
               {step === 2 && (
                 <motion.div
                   key="step2"
@@ -387,7 +444,34 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                   transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <StepHeader onBack={goPrev} title="Select Date & Time" />
+                  <StepHeader onBack={goPrev} title="Select Barber, Date & Time" />
+
+                  {/* Barber Selection */}
+                  <div className="space-y-4">
+                    <p className="text-xs font-medium uppercase tracking-widest text-black/40">
+                      Choose Your Barber
+                    </p>
+                    {barbers.length === 0 ? (
+                      <div className="text-center py-4 text-black/50">Loading barbers...</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {barbers.map((barber) => (
+                          <button
+                            key={barber.id}
+                            onClick={() => { setSelectedBarber(barber); setSelectedTime(null); }}
+                            className={`p-4 border-2 text-left transition-all ${
+                              selectedBarber?.id === barber.id
+                                ? "border-black bg-black/[0.02]"
+                                : "border-black/10 hover:border-black"
+                            }`}
+                          >
+                            <p className="font-medium text-black">{barber.name}</p>
+                            <p className="text-xs text-black/40 mt-1">{barber.specialty || "Professional Barber"}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="grid md:grid-cols-2 gap-10">
                     <div className="flex justify-center border border-black/10 p-4">
@@ -404,22 +488,26 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                         <Clock className="w-4 h-4" /> Available Times
                       </p>
                       <div className="grid grid-cols-2 gap-2">
-                        {timeSlots.map((time) => (
-                          <button
-                            key={time}
-                            onClick={() => setSelectedTime(time)}
-                            className={`p-3 text-sm border-2 transition-all ${
-                              selectedTime === time
-                                ? "bg-black text-white border-black"
-                                : "border-black/10 hover:border-black text-black"
-                            }`}
-                          >
-                            {time}
-                          </button>
-                        ))}
+                        {availableSlots.length === 0 ? (
+                          <p className="col-span-2 text-xs text-black/40 py-4">Select a barber and date</p>
+                        ) : (
+                          availableSlots.map((time) => (
+                            <button
+                              key={time}
+                              onClick={() => setSelectedTime(time)}
+                              className={`p-3 text-sm border-2 transition-all ${
+                                selectedTime === time
+                                  ? "bg-black text-white border-black"
+                                  : "border-black/10 hover:border-black text-black"
+                              }`}
+                            >
+                              {time}
+                            </button>
+                          ))
+                        )}
                       </div>
                       <button
-                        disabled={!selectedTime || !selectedDate}
+                        disabled={!selectedTime || !selectedDate || !selectedBarber}
                         onClick={enterStep3}
                         className="w-full bg-accent text-accent-foreground py-4 mt-4 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:opacity-90 font-medium text-sm uppercase tracking-wide"
                       >

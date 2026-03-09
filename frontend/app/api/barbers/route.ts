@@ -1,41 +1,29 @@
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    // Return mock barbers data
-    const barbers = [
-      {
-        id: 1,
-        name: 'Thabo Mkhize',
-        phone: '+27821111111',
-        specialty: 'Master Barber',
-        experience: '10+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      },
-      {
-        id: 2,
-        name: 'Sipho Nkosi',
-        phone: '+27822222222',
-        specialty: 'Fade Specialist',
-        experience: '7+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      },
-      {
-        id: 3,
-        name: 'Mandla Dlamini',
-        phone: '+27823333333',
-        specialty: 'Beard Expert',
-        experience: '8+ years',
-        image_url: '/placeholder.svg?height=300&width=300',
-        is_active: 1
-      }
-    ];
+    const { data, error } = await supabase
+      .from('barbers')
+      .select('*')
+      .eq('available', true);
+
+    if (error) {
+      console.error('[supabase] Get barbers error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const barbers = (data ?? []).map((barber: any) => ({
+      id: barber.id,
+      name: barber.full_name,
+      specialty: barber.speciality || 'Barber',
+      image_url: barber.image_url || '/placeholder.svg?height=300&width=300',
+      available: barber.available,
+    }));
 
     return NextResponse.json({ barbers });
   } catch (error) {
-    console.error('[v0] Get barbers error:', error);
+    console.error('[supabase] Get barbers error:', error);
     return NextResponse.json({ error: 'Failed to fetch barbers' }, { status: 500 });
   }
 }
