@@ -128,7 +128,7 @@ function BookingSummaryCard({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
-  const { user, isLoggedIn, login } = useAuth();
+  const { user, isLoggedIn, login, accessToken } = useAuth();
 
   // Data state
   const [services, setServices] = useState<Service[]>([]);
@@ -239,9 +239,12 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
     }
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+
       const response = await fetch("/api/appointments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           barber_id: selectedBarber!.id,
           haircut_id: selectedService!.id,

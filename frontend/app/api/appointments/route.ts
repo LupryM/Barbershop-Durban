@@ -1,111 +1,114 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabaseClient } from "@/lib/supabase/client";
 
-// GET - Fetch appointments with customer, barber and service info
+// GET - Fetch appointments for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+    const supabase = createServerSupabaseClient(token);
 
-    let query = supabase
-      .from('appointments')
+    // Identify the requesting user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from("appointments")
       .select(`
         id,
         appointment_date,
         time_slot,
         status,
-        payment_status,
         total_price,
+        payment_status,
         created_at,
-        profiles!user_id ( id, full_name, email ),
-        barbers!barber_id ( id, full_name ),
-        haircuts!haircut_id ( id, name, price )
+        haircut_id,
+        barber_id,
+        haircuts ( name, price ),
+        barbers ( full_name )
       `)
-      .order('appointment_date', { ascending: true });
-
-    if (date) {
-      query = query.eq('appointment_date', date);
-    }
-
-    const { data, error } = await query;
+      .eq("user_id", user.id)
+      .order("appointment_date", { ascending: false });
 
     if (error) {
-      console.error('[supabase] Get appointments error:', error);
+      console.error("[appointments GET] Supabase error:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Normalise to the shape the dashboards expect
-    const appointments = (data ?? []).map((row: any) => ({
-      id: row.id,
-      service_name: row.haircuts?.name ?? 'Unknown Service',
-      service_price: row.total_price != null ? `R${row.total_price}` : (row.haircuts?.price != null ? `R${row.haircuts.price}` : 'N/A'),
-      appointment_date: row.appointment_date,
-      appointment_time: row.time_slot,
-      status: row.status,
-      payment_status: row.payment_status,
-      customer_name: row.profiles?.full_name ?? 'Unknown Customer',
-      customer_email: row.profiles?.email ?? null,
-      customer_id: row.profiles?.id ?? null,
-      barber_name: row.barbers?.full_name ?? 'Unknown Barber',
-      barber_id: row.barbers?.id ?? null,
-      created_at: row.created_at,
-    }));
-
-    return NextResponse.json({ appointments });
-  } catch (error) {
-    console.error('[supabase] Get appointments error:', error);
-    return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 });
+    return NextResponse.json({ appointments: data ?? [] });
+  } catch (err) {
+    console.error("[appointments GET] Unexpected error:", err);
+    return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 });
   }
 }
 
 // POST - Create a new appointment
 export async function POST(request: NextRequest) {
   try {
-    // 1. Securely initialize Supabase server client to read cookies
-    const { createSupabaseServerClient } = await import('@/lib/supabase-server');
-    const supabaseServer = await createSupabaseServerClient();
-
-    // 2. Extract the user securely from the active session
-    const { data: { user }, error: authError } = await supabaseServer.auth.getUser();
-
-    if (authError || !user) {
-      console.error('[auth] POST /api/appointments unauthorized:', authError?.message);
-      return NextResponse.json({ error: 'Unauthorized. Please log in to book.' }, { status: 401 });
-    }
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+    const supabase = createServerSupabaseClient(token);
 
     const body = await request.json();
-    const { barber_id, haircut_id, appointment_date, appointment_time, total_price } = body;
+    // Support both "appointment_time" (from booking-system) and "time_slot" (legacy)
+    const {
+      appointment_date,
+      appointment_time,
+      time_slot,
+      barber_id,
+      haircut_id,
+      status,
+      total_price,
+      payment_status,
+      user_id,
+    } = body;
 
-    if (!barber_id || !haircut_id || !appointment_date || !appointment_time) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const resolvedTimeSlot = time_slot ?? appointment_time;
+
+    if (!appointment_date || !resolvedTimeSlot) {
+      return NextResponse.json(
+        { error: "appointment_date and appointment_time are required" },
+        { status: 400 }
+      );
     }
 
-    // 3. Insert the appointment using the VERIFIED user.id
-    const { data, error } = await supabaseServer
-      .from('appointments')
-      .insert({
-        user_id: user.id,
-        barber_id,
-        haircut_id,
-        appointment_date,
-        time_slot: appointment_time,
-        total_price: total_price ?? null,
-        status: 'pending',
-        payment_status: 'unpaid',
-      })
+    const insertData: Record<string, unknown> = {
+      appointment_date,
+      time_slot: resolvedTimeSlot,
+      status: status ?? "pending",
+      payment_status: payment_status ?? "unpaid",
+    };
+
+    if (barber_id) insertData.barber_id = barber_id;
+    if (haircut_id) insertData.haircut_id = haircut_id;
+    if (total_price !== undefined) insertData.total_price = total_price;
+
+    // Attach user_id — prefer explicit value, then verify from token
+    if (user_id) {
+      insertData.user_id = user_id;
+    } else if (token) {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) insertData.user_id = user.id;
+    }
+
+    if (!insertData.user_id) {
+      return NextResponse.json({ error: "Unauthorized. Please log in to book." }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert(insertData)
       .select()
       .single();
 
     if (error) {
-      console.error('[supabase] Create appointment error:', error);
+      console.error("[appointments POST] Supabase error:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, appointment: data });
-  } catch (error) {
-    console.error('[supabase] Create appointment error:', error);
-    return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 });
+    return NextResponse.json({ success: true, appointment: data }, { status: 201 });
+  } catch (err) {
+    console.error("[appointments POST] Unexpected error:", err);
+    return NextResponse.json({ error: "Failed to create appointment" }, { status: 500 });
   }
 }

@@ -25,6 +25,7 @@ export function OtpLoginForm({ onComplete, onBackAction }: OtpLoginFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const handleSendOtp = async () => {
     if (!email.trim()) {
@@ -65,10 +66,14 @@ export function OtpLoginForm({ onComplete, onBackAction }: OtpLoginFormProps) {
     try {
       const data = await verifyOtp({ email: email.trim(), token: otp.trim() });
       const authUser = data.user;
+      const token = data.session?.access_token ?? null;
 
       if (!authUser) {
         throw new Error("Verification failed — please try again");
       }
+
+      // Store token so it can be used for authenticated API calls
+      if (token) setAccessToken(token);
 
       const profile = await getProfile(authUser.id);
 
@@ -80,7 +85,7 @@ export function OtpLoginForm({ onComplete, onBackAction }: OtpLoginFormProps) {
           name: profile.full_name ?? "",
           role: profile.role ?? "customer",
         };
-        login(userData);
+        login(userData, token ?? undefined);
         toast.success(`Welcome back, ${userData.name}!`);
         onComplete();
       } else {
@@ -125,7 +130,7 @@ export function OtpLoginForm({ onComplete, onBackAction }: OtpLoginFormProps) {
         role: "customer",
       };
 
-      login(userData);
+      login(userData, accessToken ?? undefined);
       toast.success(`Welcome, ${userData.name}!`);
       onComplete();
     } catch (err) {
