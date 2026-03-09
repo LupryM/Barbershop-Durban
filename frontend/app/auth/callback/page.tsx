@@ -11,13 +11,21 @@
  *    - If no: redirect to /login with step=name to ask for name
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth, type AuthUser } from "@/context/auth-context";
 import { getProfile, createProfile, getCurrentUser } from "@/lib/supabase-auth";
 
 export default function AuthCallbackPage() {
+  return (
+    <Suspense>
+      <AuthCallbackContent />
+    </Suspense>
+  );
+}
+
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
