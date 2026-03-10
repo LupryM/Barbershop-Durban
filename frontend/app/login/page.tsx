@@ -21,6 +21,9 @@ import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { OtpLoginForm } from "@/components/otp-login-form";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getProfile } from "@/lib/supabase-auth";
+import { useAuth, type AuthUser, type UserRole } from "@/context/auth-context";
 
 // ─── Main wrapper ─────────────────────────────────────────────────────────────
 
@@ -40,6 +43,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/dashboard";
+  const { login } = useAuth();
 
   // Mode
   const [mode, setMode] = useState<LoginMode>("customer");
@@ -55,17 +59,12 @@ function LoginContent() {
   const validateStaffEmail = (email: string): { valid: boolean; role: "admin" | "staff" | null } => {
     const trimmed = email.trim();
 
-    // Check if email has @xclusivebarber.co.za domain
     if (!trimmed.endsWith("@xclusivebarber.co.za")) {
       return { valid: false, role: null };
     }
-
-    // Check if it's the admin account
     if (trimmed === "admin@xclusivebarber.co.za") {
       return { valid: true, role: "admin" };
     }
-
-    // Any other @xclusivebarber.co.za is staff
     return { valid: true, role: "staff" };
   };
 
@@ -86,8 +85,42 @@ function LoginContent() {
     setStaffLoading(true);
 
     try {
-      // TODO: Implement real staff/admin authentication with password verification
-      toast.error("Staff login requires Supabase configuration");
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: staffEmail.trim(),
+        password: staffPassword,
+      });
+
+      if (error) {
+        setStaffError(error.message || "Invalid email or password");
+        return;
+      }
+
+      const authUser = data.user;
+      const token = data.session?.access_token ?? null;
+
+      if (!authUser) {
+        setStaffError("Login failed — please try again");
+        return;
+      }
+
+      const profile = await getProfile(authUser.id);
+
+      if (!profile) {
+        setStaffError("No staff profile found. Contact your admin.");
+        return;
+      }
+
+      const userData: AuthUser = {
+        id: authUser.id,
+        email: authUser.email ?? staffEmail,
+        name: profile.full_name ?? "Staff Member",
+        role: (profile.role as UserRole) ?? "barber",
+      };
+
+      login(userData, token ?? undefined);
+      toast.success(`Welcome, ${userData.name}!`);
+      router.push(returnTo);
     } finally {
       setStaffLoading(false);
     }
