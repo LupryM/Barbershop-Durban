@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar as CalendarIcon, Clock, DollarSign, LogOut, ChevronLeft, ChevronRight, Home, User } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, DollarSign, LogOut, ChevronLeft, ChevronRight, Home, User, Scissors, Plus, Pencil, Trash2 } from 'lucide-react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -27,7 +27,7 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'day' | 'week'>('day');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedTab, setSelectedTab] = useState<'schedule' | 'analytics' | 'crm'>('schedule');
+  const [selectedTab, setSelectedTab] = useState<'schedule' | 'analytics' | 'crm' | 'services'>('schedule');
 
   useEffect(() => {
     fetchAppointments();
@@ -35,17 +35,17 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
 
   const fetchAppointments = async () => {
     try {
-      let url = '/api/appointments';
+      let url = '/api/appointments/all';
       if (view === 'day') {
         url += `?date=${format(currentDate, 'yyyy-MM-dd')}`;
       }
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
-        setAppointments(data.appointments);
+        setAppointments(data.appointments ?? []);
       }
     } catch {
-      // silently handle - testing mode
+      // silently handle
     } finally {
       setLoading(false);
     }
@@ -98,6 +98,7 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
     { id: 'schedule' as const, label: 'Master Schedule' },
     { id: 'analytics' as const, label: 'Analytics' },
     { id: 'crm' as const, label: 'Customer CRM' },
+    { id: 'services' as const, label: 'Services' },
   ];
 
   return (
@@ -221,7 +222,7 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
                 <div className="space-y-1">
                   {timeSlots.map((time) => {
                     const slotAppointments = getDayAppointments(currentDate).filter(
-                      apt => apt.appointment_time.startsWith(time.split(':')[0])
+                      apt => (apt.appointment_time ?? '').startsWith(time.split(':')[0])
                     );
                     return (
                       <div key={time} className="flex gap-4 border-b border-black/5 py-3">
@@ -280,7 +281,7 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
                           <td className="py-2 px-4 text-xs text-black/30">{time}</td>
                           {getWeekDays().map((day) => {
                             const dayApts = getDayAppointments(day).filter(
-                              apt => apt.appointment_time.startsWith(time.split(':')[0])
+                              apt => (apt.appointment_time ?? '').startsWith(time.split(':')[0])
                             );
                             return (
                               <td key={day.toISOString()} className="py-2 px-4">
@@ -305,6 +306,7 @@ export function AdminDashboard({ user }: { user: AuthUser }) {
 
         {selectedTab === 'analytics' && <AnalyticsTab />}
         {selectedTab === 'crm' && <CRMTab />}
+        {selectedTab === 'services' && <ServicesTab />}
       </div>
     </div>
   );
@@ -522,6 +524,202 @@ function CRMTab() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── Services Tab ──────────────────────────────────────────────────────────────
+
+interface Haircut {
+  id: number;
+  name: string;
+  price: number;
+  description: string | null;
+}
+
+function ServicesTab() {
+  const [haircuts, setHaircuts] = useState<Haircut[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+
+  useEffect(() => {
+    fetchHaircuts();
+  }, []);
+
+  const fetchHaircuts = async () => {
+    try {
+      const res = await fetch('/api/haircuts');
+      const data = await res.json();
+      if (res.ok) setHaircuts(data.haircuts ?? []);
+    } catch {
+      toast.error('Failed to load services');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim() || !newPrice.trim()) {
+      toast.error('Name and price are required');
+      return;
+    }
+    const price = parseFloat(newPrice);
+    if (isNaN(price) || price <= 0) {
+      toast.error('Price must be a valid number');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/haircuts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName.trim(), price, description: newDesc.trim() || null }),
+      });
+      if (res.ok) {
+        toast.success('Service added');
+        setNewName('');
+        setNewPrice('');
+        setNewDesc('');
+        setShowForm(false);
+        fetchHaircuts();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to add service');
+      }
+    } catch {
+      toast.error('Failed to add service');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block w-8 h-8 border-2 border-black/10 border-t-black rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-light">Services</h2>
+          <p className="text-xs text-black/40 mt-1">{haircuts.length} services available</p>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-2 bg-accent text-accent-foreground px-5 py-2.5 text-xs uppercase tracking-widest hover:opacity-90 transition-all font-semibold"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Add Service
+        </button>
+      </div>
+
+      {/* Add service form */}
+      {showForm && (
+        <div className="border-2 border-accent/30 p-6 bg-accent/5">
+          <h3 className="text-sm font-medium mb-4 uppercase tracking-widest text-black/60">New Service</h3>
+          <form onSubmit={handleAddService} className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-black/40">Service Name *</label>
+              <input
+                type="text"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder="e.g. Skin Fade"
+                className="w-full px-3 py-2.5 border-2 border-black/10 text-sm focus:border-black focus:outline-none bg-white text-black"
+                disabled={saving}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-black/40">Price (R) *</label>
+              <input
+                type="number"
+                value={newPrice}
+                onChange={e => setNewPrice(e.target.value)}
+                placeholder="e.g. 150"
+                min="0"
+                step="0.01"
+                className="w-full px-3 py-2.5 border-2 border-black/10 text-sm focus:border-black focus:outline-none bg-white text-black"
+                disabled={saving}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-black/40">Description</label>
+              <input
+                type="text"
+                value={newDesc}
+                onChange={e => setNewDesc(e.target.value)}
+                placeholder="Optional description"
+                className="w-full px-3 py-2.5 border-2 border-black/10 text-sm focus:border-black focus:outline-none bg-white text-black"
+                disabled={saving}
+              />
+            </div>
+            <div className="md:col-span-3 flex gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-accent text-accent-foreground px-6 py-2 text-xs uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50"
+              >
+                {saving ? 'Adding…' : 'Add Service'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="border-2 border-black/10 px-6 py-2 text-xs uppercase tracking-widest hover:bg-black/5 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Services list */}
+      <div className="border-2 border-black/10 overflow-hidden">
+        {haircuts.length === 0 ? (
+          <div className="p-16 text-center">
+            <Scissors className="w-12 h-12 text-black/15 mx-auto mb-6" />
+            <p className="text-black/40 text-sm">No services yet. Add your first service above.</p>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="border-b border-black/10">
+              <tr>
+                <th className="text-left py-4 px-6 text-[10px] font-medium text-black/30 uppercase tracking-widest">Service</th>
+                <th className="text-left py-4 px-6 text-[10px] font-medium text-black/30 uppercase tracking-widest">Description</th>
+                <th className="text-right py-4 px-6 text-[10px] font-medium text-black/30 uppercase tracking-widest">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {haircuts.map(haircut => (
+                <tr key={haircut.id} className="border-b border-black/5 hover:bg-black/[0.02]">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <Scissors className="w-4 h-4 text-black/20" />
+                      <span className="text-sm font-medium">{haircut.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-sm text-black/40">
+                    {haircut.description || <span className="italic text-black/20">No description</span>}
+                  </td>
+                  <td className="py-4 px-6 text-right">
+                    <span className="text-sm font-medium">R{haircut.price}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

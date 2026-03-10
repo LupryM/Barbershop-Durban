@@ -21,6 +21,9 @@ import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { OtpLoginForm } from "@/components/otp-login-form";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getProfile } from "@/lib/supabase-auth";
+import { useAuth, type AuthUser, type UserRole } from "@/context/auth-context";
 
 // ─── Main wrapper ─────────────────────────────────────────────────────────────
 
@@ -40,6 +43,7 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/dashboard";
+  const { login } = useAuth();
 
   // Mode
   const [mode, setMode] = useState<LoginMode>("customer");
@@ -52,6 +56,18 @@ function LoginContent() {
 
   // ─ Staff flow ─────────────────────────────────────────────────────────────
 
+  const validateStaffEmail = (email: string): { valid: boolean; role: "admin" | "staff" | null } => {
+    const trimmed = email.trim();
+
+    if (!trimmed.endsWith("@xclusivebarber.co.za")) {
+      return { valid: false, role: null };
+    }
+    if (trimmed === "admin@xclusivebarber.co.za") {
+      return { valid: true, role: "admin" };
+    }
+    return { valid: true, role: "staff" };
+  };
+
   const handleStaffLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!staffEmail.trim() || !staffPassword.trim()) {
@@ -59,12 +75,52 @@ function LoginContent() {
       return;
     }
 
+    const emailValidation = validateStaffEmail(staffEmail);
+    if (!emailValidation.valid) {
+      setStaffError("Email must end with @xclusivebarber.co.za");
+      return;
+    }
+
     setStaffError(null);
     setStaffLoading(true);
 
     try {
-      // TODO: Implement real staff authentication
-      toast.error("Staff login requires Supabase configuration");
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: staffEmail.trim(),
+        password: staffPassword,
+      });
+
+      if (error) {
+        setStaffError(error.message || "Invalid email or password");
+        return;
+      }
+
+      const authUser = data.user;
+      const token = data.session?.access_token ?? null;
+
+      if (!authUser) {
+        setStaffError("Login failed — please try again");
+        return;
+      }
+
+      const profile = await getProfile(authUser.id);
+
+      if (!profile) {
+        setStaffError("No staff profile found. Contact your admin.");
+        return;
+      }
+
+      const userData: AuthUser = {
+        id: authUser.id,
+        email: authUser.email ?? staffEmail,
+        name: profile.full_name ?? "Staff Member",
+        role: (profile.role as UserRole) ?? "barber",
+      };
+
+      login(userData, token ?? undefined);
+      toast.success(`Welcome, ${userData.name}!`);
+      router.push(returnTo);
     } finally {
       setStaffLoading(false);
     }
@@ -123,7 +179,7 @@ function LoginContent() {
                   Staff Sign In
                 </h1>
                 <p className="text-black/50 text-sm leading-relaxed">
-                  Barbers and admins only.
+                  Barbers, admins, and team members. Use your @xclusivebarber.co.za email.
                 </p>
               </div>
 
@@ -152,7 +208,7 @@ function LoginContent() {
                         setStaffEmail(e.target.value);
                         setStaffError(null);
                       }}
-                      placeholder="you@xclusive.co.za"
+                      placeholder="you@xclusivebarber.co.za"
                       className="w-full pl-12 pr-4 py-4 border-2 border-black/10 text-black placeholder:text-black/20 focus:border-black focus:outline-none transition-all bg-white"
                       disabled={staffLoading}
                     />
