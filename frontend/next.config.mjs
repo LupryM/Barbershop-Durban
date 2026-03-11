@@ -9,7 +9,7 @@ const nextConfig = {
   async rewrites() {
     // Proxy all database/API routes to the C# ASP.NET Core backend.
     // Auth routes (/api/auth/*) are handled by Next.js itself.
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5280';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5280';
     return [
       {
         source: '/api/appointments/:path*',
