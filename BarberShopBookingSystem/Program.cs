@@ -34,11 +34,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         var supabaseUrl = builder.Configuration["Supabase:Url"];
         var issuer = $"{supabaseUrl}/auth/v1"; // Supabase JWTs use /auth/v1 as the issuer
 
-        // Authority tells ASP.NET Core to fetch the JWKS from Supabase's
-        // OpenID Connect discovery endpoint ({issuer}/.well-known/openid-configuration).
-        // This handles ES256 tokens automatically — do NOT also set IssuerSigningKey
-        // here as that would override JWKS discovery and cause 401s for ES256 tokens.
-        options.Authority = issuer;
+        // Use MetadataAddress for more reliable OIDC discovery.
+        // This explicitly fetches the OpenID Connect configuration including JWKS
+        // for ES256 token validation, with better error handling and retry logic.
+        options.MetadataAddress = $"{issuer}/.well-known/openid-configuration";
         options.RequireHttpsMetadata = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
