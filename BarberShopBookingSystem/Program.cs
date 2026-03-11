@@ -49,12 +49,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Add CORS services
+// FRONTEND_URL can be a single URL or comma-separated list e.g. "https://myapp.vercel.app,https://mycustomdomain.co.za"
+var allowedOrigins = new List<string> { "http://localhost:3000", "http://localhost:5173" };
+var frontendUrl = builder.Configuration["FRONTEND_URL"];
+if (!string.IsNullOrEmpty(frontendUrl))
+    allowedOrigins.AddRange(frontendUrl.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Next.js and Vite ports
+            policy.WithOrigins(allowedOrigins.ToArray())
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         });
