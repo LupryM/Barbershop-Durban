@@ -49,12 +49,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Add CORS services
+var allowedOrigins = new List<string> { "http://localhost:3000", "http://localhost:5173" };
+var frontendUrl = builder.Configuration["FRONTEND_URL"];
+if (!string.IsNullOrEmpty(frontendUrl))
+    allowedOrigins.Add(frontendUrl);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Next.js and Vite ports
+            policy.WithOrigins(allowedOrigins.ToArray())
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         });
