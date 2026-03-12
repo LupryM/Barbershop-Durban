@@ -252,7 +252,8 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
       const appointmentId = appointment.id;
 
       // Step 2: Create Yoco checkout session
-      const checkoutRes = await fetch("/api/payments/create-checkout", {
+      // ADDED: process.env.NEXT_PUBLIC_API_URL to ensure it hits Azure
+      const checkoutRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/payments/create-checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -260,17 +261,20 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
           appointmentId,
         }),
       });
-
       if (!checkoutRes.ok) {
         const errText = await checkoutRes.text();
         throw new Error(`Payment setup failed: ${errText}`);
       }
-
-      const { redirectUrl } = await checkoutRes.json();
-
-      // Step 3: Redirect to Yoco hosted payment page
+      const data = await checkoutRes.json();
+      console.log("Data returned from Azure:", data); // Helps us debug if it fails again!
+      // Step 3: Extract URL safely (catches capitalization differences from C#)
+      const finalRedirectUrl = data.redirectUrl || data.RedirectUrl || data.redirecturl || data.url;
+      if (!finalRedirectUrl) {
+         throw new Error("Azure returned success, but the Yoco URL was missing. Check the console log!");
+      }
+      // Step 4: Redirect to Yoco hosted payment page
       toast.success("Redirecting to payment...");
-      window.location.href = redirectUrl;
+      window.location.href = finalRedirectUrl;
     } catch (error: any) {
       console.error("Booking error:", error);
       toast.error(error.message || "Failed to create appointment");
