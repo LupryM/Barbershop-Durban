@@ -257,9 +257,14 @@ namespace BarberShopBookingSystem.Controllers
 
         // PUT /api/appointments/{id}/late-arrival 
         [HttpPut("{id}/late-arrival")]
-        [Authorize(Roles = "admin")]
         public async Task<IActionResult> HandleLateArrival(Guid id, [FromBody] int minutesLate)
         {
+            // Manual role check — Supabase JWTs don't carry app-level roles
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            var adminProfile = await _context.Profiles.FindAsync(Guid.Parse(userIdClaim));
+            if (adminProfile == null || adminProfile.Role != "admin") return Forbid();
+
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
 
@@ -272,9 +277,14 @@ namespace BarberShopBookingSystem.Controllers
 
         // PUT /api/appointments/{id}/cancel 
         [HttpPut("{id}/cancel")]
-        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CancelAppointment(Guid id, [FromServices] IEmailService emailService)
         {
+            // Manual role check — Supabase JWTs don't carry app-level roles
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            var adminProfile = await _context.Profiles.FindAsync(Guid.Parse(userIdClaim));
+            if (adminProfile == null || adminProfile.Role != "admin") return Forbid();
+
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
 
