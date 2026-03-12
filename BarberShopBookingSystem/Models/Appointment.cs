@@ -10,6 +10,9 @@
         public string TimeSlot { get; set; } = string.Empty;
         public string Status { get; set; } = "pending";
 
+        // Add this right under public string Status { get; set; }
+        public bool IsLate { get; set; } = false;
+
         // New Payment Fields
         public string PaymentStatus { get; set; } = "unpaid";
         public string? YocoPaymentId { get; set; }

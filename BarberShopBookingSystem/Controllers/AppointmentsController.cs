@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Text.Json.Serialization; // <-- ADDED THIS FOR JSON BINDING
+using System.Text.Json.Serialization; // <-- ESSENTIAL FOR JSON BINDING
 
 namespace BarberShopBookingSystem.Controllers
 {
@@ -59,6 +59,31 @@ namespace BarberShopBookingSystem.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAllAppointments([FromQuery] string? date)
         {
+            // --- 1. THE LAZY CLEANUP (AUTO-CANCEL 30-MIN LATE BOOKINGS) ---
+            var localTimeNow = DateTime.UtcNow.AddHours(2); // SAST
+            var today = DateOnly.FromDateTime(localTimeNow);
+
+            // Find all pending appointments from today or earlier
+            var staleCheck = await _context.Appointments
+                .Where(a => a.Status == "pending" && a.AppointmentDate <= today)
+                .ToListAsync();
+
+            bool needsSave = false;
+            foreach (var appt in staleCheck)
+            {
+                if (DateTime.TryParse($"{appt.AppointmentDate:yyyy-MM-dd} {appt.TimeSlot}", out DateTime apptTime))
+                {
+                    // If it is more than 30 minutes past the scheduled time, mark as no-show
+                    if (apptTime.AddMinutes(30) < localTimeNow)
+                    {
+                        appt.Status = "no-show";
+                        needsSave = true;
+                    }
+                }
+            }
+            if (needsSave) await _context.SaveChangesAsync();
+            // --------------------------------------------------------------
+
             var query = _context.Appointments.AsQueryable();
 
             if (!string.IsNullOrEmpty(date) && DateOnly.TryParse(date, out var targetDate))
@@ -117,14 +142,15 @@ namespace BarberShopBookingSystem.Controllers
 
             var appointmentDateUtc = dto.AppointmentDate;
 
-            // --- UPDATED POLICY: 30-Minute Minimum Notice with Year 1 Trap ---
+            // --- THIS ALREADY PREVENTS BOOKING IN THE PAST ---
             if (DateTime.TryParse($"{dto.AppointmentDate:yyyy-MM-dd} {dto.TimeSlot}", out DateTime requestedTime))
             {
-                // FAILSAFE: If the frontend sends bad data and C# defaults to Year 1
                 if (requestedTime.Year == 1)
                     return BadRequest(new { error = "System error: The date was missing or incorrectly formatted." });
 
                 var localTimeNow = DateTime.UtcNow.AddHours(2); // SAST timezone
+
+                // If the requested time is less than 30 mins from right now, it rejects it.
                 if (requestedTime < localTimeNow.AddMinutes(30))
                     return BadRequest(new { error = "Appointments must be booked at least 30 minutes in advance." });
             }
@@ -132,12 +158,11 @@ namespace BarberShopBookingSystem.Controllers
             {
                 return BadRequest(new { error = "Could not read the appointment time format." });
             }
-            // -----------------------------------------------------------------
+            // -------------------------------------------------
 
             var haircut = await _context.Haircuts.FindAsync(dto.HaircutId);
             if (haircut == null) return NotFound(new { error = "Haircut not found" });
 
-            // POLICY: Auto-Assign Available Barber (Load Balanced)
             var allActiveBarbers = await _context.Barbers.Where(b => b.Available).ToListAsync();
             var targetDate = dto.AppointmentDate;
 
@@ -208,11 +233,14 @@ namespace BarberShopBookingSystem.Controllers
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
 
-            var validStatuses = new[] { "pending", "confirmed", "completed", "cancelled", "late" };
-            if (!validStatuses.Contains(dto.Status))
-                return BadRequest("Invalid status.");
+            // --- 2. THE COMPLETE BUTTON FIX ---
+            var validStatuses = new[] { "pending", "confirmed", "completed", "cancelled", "late", "no-show" };
+            var requestedStatus = dto.Status?.ToLower(); // Force lowercase
 
-            appointment.Status = dto.Status;
+            if (string.IsNullOrEmpty(requestedStatus) || !validStatuses.Contains(requestedStatus))
+                return BadRequest(new { error = $"Invalid status. Must be one of: {string.Join(", ", validStatuses)}" });
+
+            appointment.Status = requestedStatus;
             await _context.SaveChangesAsync();
 
             return Ok(appointment);
@@ -268,7 +296,12 @@ namespace BarberShopBookingSystem.Controllers
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
 
-            if (minutesLate >= 30) return BadRequest("Policy: 30 minutes late requires rescheduling to next slot.");
+            if (minutesLate >= 30) return BadRequest("Policy: 30 minutes late requires rescheduling.");
+
+            // Flip the permanent flag so we never forget they were late
+            appointment.IsLate = true;
+
+            // Apply your late fee logic
             if (minutesLate > 15) appointment.TotalPrice += 10;
 
             await _context.SaveChangesAsync();
@@ -279,7 +312,6 @@ namespace BarberShopBookingSystem.Controllers
         [HttpPut("{id}/cancel")]
         public async Task<IActionResult> CancelAppointment(Guid id, [FromServices] IEmailService emailService)
         {
-            // Manual role check — Supabase JWTs don't carry app-level roles
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null) return Unauthorized();
             var adminProfile = await _context.Profiles.FindAsync(Guid.Parse(userIdClaim));
@@ -299,7 +331,6 @@ namespace BarberShopBookingSystem.Controllers
         }
     }
 
-    // --- ADDED THE BULLETPROOF DTO HERE ---
     public class AppointmentCreateDto
     {
         [JsonPropertyName("haircutId")]
@@ -324,8 +355,10 @@ namespace BarberShopBookingSystem.Controllers
         public string NewTime { get; set; } = string.Empty;
     }
 
+    // --- ADDED THE JSON MAGNET TO THE STATUS DTO ---
     public class UpdateStatusDto
     {
+        [JsonPropertyName("status")]
         public string Status { get; set; } = string.Empty;
     }
 }
