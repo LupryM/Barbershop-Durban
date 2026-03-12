@@ -646,23 +646,23 @@
       "AppointmentCreateDto": {
         "type": "object",
         "properties": {
-          "haircut_id": {
+          "haircutId": {
             "type": "string",
             "format": "uuid"
           },
-          "appointment_date": {
+          "appointmentDate": {
             "type": "string",
             "format": "date"
           },
-          "time_slot": {
+          "timeSlot": {
             "type": "string",
             "nullable": true
           },
-          "discount_amount": {
+          "discountAmount": {
             "type": "number",
             "format": "double"
           },
-          "discount_code": {
+          "discountCode": {
             "type": "string",
             "nullable": true
           }
