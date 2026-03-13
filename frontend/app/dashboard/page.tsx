@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CustomerDashboard } from "@/components/customer-dashboard";
@@ -8,7 +9,7 @@ import { BarberDashboard } from "@/components/barber-dashboard";
 import { Toaster } from "sonner";
 import { useAuth } from "@/context/auth-context";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoggedIn, isLoading } = useAuth();
@@ -36,5 +37,13 @@ export default function DashboardPage() {
       <Toaster position="top-center" expand={true} richColors />
       {content}
     </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardContent />
+    </Suspense>
   );
 }
