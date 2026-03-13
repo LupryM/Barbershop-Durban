@@ -639,6 +639,37 @@
           }
         }
       }
+    },
+    "/api/Profiles/newsletter": {
+      "patch": {
+        "tags": [
+          "Profiles"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -705,7 +736,7 @@
       "ConfirmPaymentRequest": {
         "type": "object",
         "properties": {
-          "appointmentId": {
+          "appointment_id": {
             "type": "string",
             "format": "uuid"
           }
@@ -749,7 +780,7 @@
             "type": "number",
             "format": "double"
           },
-          "appointmentId": {
+          "appointment_id": {
             "type": "string",
             "format": "uuid"
           }
@@ -774,6 +805,9 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "wants_newsletter": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -788,6 +822,15 @@
           "new_time": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateNewsletterDto": {
+        "type": "object",
+        "properties": {
+          "wantsNewsletter": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

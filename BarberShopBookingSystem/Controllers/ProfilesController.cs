@@ -56,6 +56,7 @@ namespace BarberShopBookingSystem.Controllers
                     LastVisit = stats?.LastVisit,
                     Preferences = "",
                     Notes = "",
+                    WantsNewsletter = p.WantsNewsletter // <-- ADDED FOR ADMIN CRM EXPORTS
                 };
             });
 
@@ -106,6 +107,27 @@ namespace BarberShopBookingSystem.Controllers
             return NoContent();
         }
 
+        // --- NEW: CUSTOMER NEWSLETTER TOGGLE ---
+        // PATCH /api/profiles/newsletter
+        [HttpPatch("newsletter")]
+        [Authorize]
+        public async Task<IActionResult> ToggleNewsletter([FromBody] UpdateNewsletterDto dto)
+        {
+            // Gets the ID of whoever is currently logged in making the request
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            var userId = Guid.Parse(userIdClaim);
+
+            var profile = await _context.Profiles.FindAsync(userId);
+            if (profile == null) return NotFound("Profile not found.");
+
+            // Update the boolean
+            profile.WantsNewsletter = dto.WantsNewsletter;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Newsletter preferences updated!", wantsNewsletter = profile.WantsNewsletter });
+        }
+
         // PATCH /api/profiles — update customer notes/preferences (no-op, fields not in current schema)
         [HttpPatch]
         [Authorize]
@@ -119,5 +141,12 @@ namespace BarberShopBookingSystem.Controllers
 
             return Ok();
         }
+    }
+
+    // --- DTO FOR THE NEWSLETTER ---
+    public class UpdateNewsletterDto
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("wantsNewsletter")]
+        public bool WantsNewsletter { get; set; }
     }
 }
