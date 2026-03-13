@@ -26,7 +26,7 @@ namespace BarberShopBookingSystem.Controllers
 
             var userId = Guid.Parse(userIdClaim);
             var appointments = await _context.Appointments
-                .Where(a => a.UserId == userId)
+              .Where(a => a.UserId == userId || a.BarberId == userId)
                 .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
 
