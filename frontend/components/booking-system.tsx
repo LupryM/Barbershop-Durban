@@ -323,10 +323,10 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   // ── Policy items ──────────────────────────────────────────────────────────
 
   const BOOKING_POLICIES = [
-    { icon: "⏰", title: "Advance booking", detail: "Appointments must be booked at least 30 minutes in advance." },
-    { icon: "🔁", title: "One reschedule only", detail: "Each appointment may be rescheduled once, with at least 2 hours' notice." },
-    { icon: "⚠️", title: "Late arrival fee", detail: "Arriving 15–29 minutes late incurs a R10 fee. Arrivals 30+ minutes late must reschedule." },
-    { icon: "❌", title: "Cancellations", detail: "Cancellations are permitted before your appointment time. No-shows are not refunded." },
+    { icon: <Clock className="w-4 h-4" />, title: "Advance booking", detail: "Appointments must be booked at least 30 minutes in advance." },
+    { icon: <CalendarIcon className="w-4 h-4" />, title: "One reschedule only", detail: "Each appointment may be rescheduled once, with at least 2 hours' notice." },
+    { icon: <AlertTriangle className="w-4 h-4" />, title: "Late arrival fee", detail: "Arriving 15–29 minutes late incurs a R10 fee. Arrivals 30+ minutes late must reschedule." },
+    { icon: <ShieldAlert className="w-4 h-4" />, title: "Cancellations", detail: "Cancellations are permitted before your appointment time. No-shows are not refunded." },
   ];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -526,18 +526,18 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                       </div>
 
                       {/* ── Booking Policies ──────────────────────────── */}
-                      <div className="border-2 border-black/10 p-5">
-                        <p className="text-[10px] uppercase tracking-widest text-black/40 font-medium mb-4 flex items-center gap-2">
+                      <div className="border-2 border-black/10 p-5 bg-black/[0.01]">
+                        <p className="text-[10px] uppercase tracking-widest text-black/40 font-medium mb-5 flex items-center gap-2">
                           <ShieldAlert className="w-3.5 h-3.5" /> Booking Policies
                         </p>
-                        <ul className="space-y-3">
+                        <ul className="space-y-4">
                           {BOOKING_POLICIES.map((policy) => (
-                            <li key={policy.title} className="flex gap-3 text-sm">
-                              <span className="text-base leading-none mt-0.5">{policy.icon}</span>
-                              <span>
-                                <span className="font-medium text-black">{policy.title}: </span>
-                                <span className="text-black/50">{policy.detail}</span>
-                              </span>
+                            <li key={policy.title} className="flex gap-4 items-start text-sm">
+                              <div className="mt-0.5 text-black/40 flex-shrink-0">{policy.icon}</div>
+                              <div className="flex-1">
+                                <p className="font-semibold text-black mb-0.5 leading-snug">{policy.title}</p>
+                                <p className="text-black/50 leading-relaxed text-xs">{policy.detail}</p>
+                              </div>
                             </li>
                           ))}
                         </ul>
