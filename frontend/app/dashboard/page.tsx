@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CustomerDashboard } from "@/components/customer-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { BarberDashboard } from "@/components/barber-dashboard";
@@ -10,7 +10,9 @@ import { useAuth } from "@/context/auth-context";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoggedIn, isLoading } = useAuth();
+  const tabParam = searchParams.get('tab') as 'appointments' | 'profile' | null;
 
   useEffect(() => {
     // Wait for auth hydration before deciding to redirect
@@ -26,7 +28,7 @@ export default function DashboardPage() {
   const content = (() => {
     if (user.role === "admin")  return <AdminDashboard  user={user} />;
     if (user.role === "barber") return <BarberDashboard user={user} />;
-    return <CustomerDashboard user={user} />;
+    return <CustomerDashboard user={user} initialTab={tabParam} />;
   })();
 
   return (
