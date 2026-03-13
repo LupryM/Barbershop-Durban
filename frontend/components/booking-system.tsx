@@ -26,6 +26,8 @@ import {
   AlertTriangle,
   ExternalLink,
   ShieldAlert,
+  RotateCcw,
+  XCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
@@ -316,10 +318,10 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   // ── Policy items ──────────────────────────────────────────────────────────
 
   const BOOKING_POLICIES = [
-    { icon: "⏰", title: "Advance booking", detail: "Appointments must be booked at least 30 minutes in advance." },
-    { icon: "🔁", title: "One reschedule only", detail: "Each appointment may be rescheduled once, with at least 2 hours' notice." },
-    { icon: "⚠️", title: "Late arrival fee", detail: "Arriving 15–29 minutes late incurs a R10 fee. Arrivals 30+ minutes late must reschedule." },
-    { icon: "❌", title: "Cancellations", detail: "Cancellations are permitted before your appointment time. No-shows are not refunded." },
+    { Icon: Clock,         title: "Advance booking",      detail: "Appointments must be booked at least 30 minutes in advance." },
+    { Icon: RotateCcw,    title: "One reschedule only",  detail: "Each appointment may be rescheduled once, with at least 2 hours' notice." },
+    { Icon: AlertTriangle, title: "Late arrival fee",     detail: "Arriving 15–29 minutes late incurs a R10 fee. Arrivals 30+ minutes late must reschedule." },
+    { Icon: XCircle,      title: "Cancellations",        detail: "Cancellations are permitted before your appointment time. No-shows are not refunded." },
   ];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -506,7 +508,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                         <ul className="space-y-3">
                           {BOOKING_POLICIES.map((policy) => (
                             <li key={policy.title} className="flex gap-3 text-sm">
-                              <span className="text-base leading-none mt-0.5">{policy.icon}</span>
+                              <policy.Icon className="w-4 h-4 text-black/40 flex-shrink-0 mt-0.5" />
                               <span>
                                 <span className="font-medium text-black">{policy.title}: </span>
                                 <span className="text-black/50">{policy.detail}</span>

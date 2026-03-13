@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, X, Edit2, LogOut, Plus, Home, User, Save, Settings } from 'lucide-react';
+import { Calendar, Clock, X, Edit2, LogOut, Plus, Home, User, Save, Settings, Mail, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useAuth, type AuthUser } from '@/context/auth-context';
 import { updateProfile } from '@/lib/supabase-auth';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 // Shape returned by GET /api/appointments
 interface AppointmentRow {
@@ -24,16 +25,21 @@ interface AppointmentRow {
 
 type ActiveTab = 'appointments' | 'profile';
 
-export function CustomerDashboard({ user }: { user: AuthUser }) {
+export function CustomerDashboard({ user, initialTab = 'appointments' }: { user: AuthUser; initialTab?: ActiveTab }) {
   const router = useRouter();
   const { logout, accessToken, updateUser } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('appointments');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
 
   // Profile edit state
   const [editName, setEditName] = useState(user.name || '');
   const [savingProfile, setSavingProfile] = useState(false);
+
+  // Email change state
+  const [newEmail, setNewEmail] = useState('');
+  const [changingEmail, setChangingEmail] = useState(false);
+  const [emailChangeSent, setEmailChangeSent] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
@@ -92,6 +98,30 @@ export function CustomerDashboard({ user }: { user: AuthUser }) {
       toast.error('Failed to update profile');
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleChangeEmail = async () => {
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    if (trimmed === user.email.toLowerCase()) {
+      toast.error('That is already your current email');
+      return;
+    }
+    setChangingEmail(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.updateUser({ email: trimmed });
+      if (error) throw new Error(error.message);
+      setEmailChangeSent(true);
+      setNewEmail('');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to request email change');
+    } finally {
+      setChangingEmail(false);
     }
   };
 
@@ -333,15 +363,46 @@ export function CustomerDashboard({ user }: { user: AuthUser }) {
                   </div>
                 </div>
 
-                {/* Email — read-only */}
+                {/* Email change */}
                 <div className="p-6">
-                  <label className="text-[10px] uppercase tracking-widest text-black/40 font-medium block mb-3">
+                  <label className="text-[10px] uppercase tracking-widest text-black/40 font-medium block mb-1">
                     Email Address
                   </label>
-                  <p className="text-sm text-black/70">{user.email}</p>
-                  <p className="text-[11px] text-black/30 mt-1">
-                    Email is managed through your sign-in provider and cannot be changed here.
-                  </p>
+                  <p className="text-sm text-black/70 mb-4">{user.email}</p>
+
+                  {emailChangeSent ? (
+                    <div className="flex items-start gap-3 p-3 border-2 border-black/10 bg-black/[0.02]">
+                      <CheckCircle className="w-4 h-4 text-black/40 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-black/60 leading-relaxed">
+                        A confirmation link has been sent. Click it in your new inbox to complete the change.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-[11px] text-black/30 mb-3">
+                        Enter a new email below — a confirmation link will be sent to it.
+                      </p>
+                      <div className="flex gap-3">
+                        <div className="relative flex-1">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/30" />
+                          <input
+                            type="email"
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                            placeholder="new@email.com"
+                            className="w-full pl-9 pr-4 py-2.5 border-2 border-black/10 text-sm focus:outline-none focus:border-black transition-colors bg-white"
+                          />
+                        </div>
+                        <button
+                          onClick={handleChangeEmail}
+                          disabled={changingEmail || !newEmail.trim()}
+                          className="px-4 py-2.5 border-2 border-black/10 text-black/50 text-xs uppercase tracking-widest font-semibold font-montserrat hover:border-black/30 hover:text-black transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                        >
+                          {changingEmail ? 'Sending…' : 'Change Email'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Role */}

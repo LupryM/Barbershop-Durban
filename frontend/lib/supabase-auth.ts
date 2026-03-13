@@ -136,6 +136,7 @@ export async function updateProfile(userId: string, updates: Partial<CreateProfi
     .update({
       ...(updates.name && { full_name: updates.name }),
       ...(updates.role && { role: updates.role }),
+      ...(updates.email && { email: updates.email }),
     })
     .eq('id', userId)
     .select()

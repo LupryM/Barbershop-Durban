@@ -65,3 +65,12 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Migration: backfill missing emails from auth.users.
+-- Run this once in the SQL Editor if existing profiles have a blank email field.
+UPDATE public.profiles p
+SET email = u.email
+FROM auth.users u
+WHERE p.id = u.id
+  AND (p.email = '' OR p.email IS NULL)
+  AND u.email IS NOT NULL;

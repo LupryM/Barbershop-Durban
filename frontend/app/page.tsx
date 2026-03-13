@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Toaster } from "sonner";
-import { Menu, X, User, LogOut, ChevronDown, Calendar } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, Calendar, Settings } from "lucide-react";
 import { Hero } from "@/components/hero";
 import { WelcomeTitle, Description } from "@/components/welcome";
 import { Services } from "@/components/services";
@@ -100,6 +100,13 @@ export default function App() {
                     >
                       <Calendar className="w-4 h-4 text-black/40" /> My Bookings
                     </Link>
+                    <Link
+                      href="/dashboard?tab=profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-black/[0.04] transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-black/40" /> Account Settings
+                    </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-black/60 hover:bg-black/[0.04] transition-colors border-t border-black/5"
@@ -187,6 +194,13 @@ export default function App() {
                     className="flex items-center gap-3 hover:opacity-70 transition-opacity"
                   >
                     <Calendar className="w-5 h-5" /> My Bookings
+                  </Link>
+                  <Link
+                    href="/dashboard?tab=profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 hover:opacity-70 transition-opacity"
+                  >
+                    <Settings className="w-5 h-5" /> Account Settings
                   </Link>
                   <button
                     onClick={handleLogout}
