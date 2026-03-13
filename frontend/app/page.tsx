@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Toaster } from "sonner";
-import { Menu, X, User, LogOut, ChevronDown, Calendar } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, Calendar, Settings } from "lucide-react";
 import { Hero } from "@/components/hero";
 import { WelcomeTitle, Description } from "@/components/welcome";
 import { Services } from "@/components/services";
@@ -94,6 +94,13 @@ export default function App() {
                       <p className="text-[11px] text-black/40 truncate">{user.email}</p>
                     </div>
                     <Link
+                      href="/dashboard?tab=profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-black/[0.04] transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-black/40" /> Profile Settings
+                    </Link>
+                    <Link
                       href="/dashboard"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-black/[0.04] transition-colors"
@@ -181,6 +188,13 @@ export default function App() {
 
               {isLoggedIn ? (
                 <>
+                  <Link
+                    href="/dashboard?tab=profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 hover:opacity-70 transition-opacity"
+                  >
+                    <Settings className="w-5 h-5" /> Profile Settings
+                  </Link>
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
