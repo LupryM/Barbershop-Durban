@@ -639,6 +639,37 @@
           }
         }
       }
+    },
+    "/api/Profiles/newsletter": {
+      "patch": {
+        "tags": [
+          "Profiles"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsletterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -646,9 +677,13 @@
       "AppointmentCreateDto": {
         "type": "object",
         "properties": {
-          "haircutId": {
-            "type": "string",
-            "format": "uuid"
+          "haircutIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
           },
           "appointmentDate": {
             "type": "string",
@@ -663,6 +698,10 @@
             "format": "double"
           },
           "discountCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerPhone": {
             "type": "string",
             "nullable": true
           }
@@ -726,6 +765,10 @@
           "image_url": {
             "type": "string",
             "nullable": true
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -762,6 +805,9 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "wants_newsletter": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -776,6 +822,15 @@
           "new_time": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateNewsletterDto": {
+        "type": "object",
+        "properties": {
+          "wantsNewsletter": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

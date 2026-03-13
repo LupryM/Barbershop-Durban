@@ -8,5 +8,8 @@
 
         // NEW: Needed for the cancellation notifications
         public string? Email { get; set; }
+
+        // Inside your Profile model
+        public bool WantsNewsletter { get; set; } = false;
     }
 }

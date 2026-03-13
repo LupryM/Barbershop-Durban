@@ -372,5 +372,21 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BarberShopBookingSystem.Controllers.ProfilesController",
+    "Method": "ToggleNewsletter",
+    "RelativePath": "api/Profiles/newsletter",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "BarberShopBookingSystem.Controllers.UpdateNewsletterDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]
