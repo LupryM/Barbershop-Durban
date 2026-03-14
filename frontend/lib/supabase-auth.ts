@@ -134,9 +134,9 @@ export async function updateProfile(userId: string, updates: Partial<CreateProfi
   const { data, error } = await supabase
     .from('profiles')
     .update({
-      ...(updates.name && { full_name: updates.name }),
-      ...(updates.email && { email: updates.email }),
-      ...(updates.role && { role: updates.role }),
+      ...(updates.name != null && updates.name !== '' && { full_name: updates.name }),
+      ...(updates.email != null && updates.email !== '' && { email: updates.email }),
+      ...(updates.role != null && { role: updates.role }),
     })
     .eq('id', userId)
     .select()
