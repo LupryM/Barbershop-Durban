@@ -199,6 +199,12 @@ namespace BarberShopBookingSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAppointment([FromBody] AppointmentCreateDto dto, [FromServices] IEmailService emailService)
         {
+            // 🚨 THE NEW OPTION A FIX: Reject any time that isn't exactly on the hour!
+            if (!dto.TimeSlot.EndsWith(":00"))
+            {
+                return BadRequest(new { error = "Appointments can only be booked exactly on the hour (e.g., 09:00, 10:00)." });
+            }
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null) return Unauthorized(new { error = "Unauthorized. Please log in again." });
             var userId = Guid.Parse(userIdClaim);
@@ -366,6 +372,12 @@ namespace BarberShopBookingSystem.Controllers
         [HttpPut("{id}/reschedule")]
         public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleDto dto, [FromServices] IEmailService emailService)
         {
+            // 🚨 THE NEW OPTION A FIX: Reject any time that isn't exactly on the hour!
+            if (!dto.NewTime.EndsWith(":00"))
+            {
+                return BadRequest("Appointments can only be rescheduled to exactly on the hour (e.g., 09:00, 10:00).");
+            }
+
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
 
