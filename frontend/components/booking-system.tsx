@@ -415,11 +415,6 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                               <div>
                                 <p className="font-medium text-base text-black">{service.name}</p>
                                 <p className="text-xs text-black/40 mt-0.5">{service.description || "Haircut service"}</p>
-                                {service.duration_minutes && (
-                                  <p className="text-xs text-black/30 mt-0.5 flex items-center gap-1">
-                                    <Clock className="w-3 h-3" /> {service.duration_minutes} min
-                                  </p>
-                                )}
                               </div>
                               <div className="text-right flex items-center gap-3">
                                 <p className="font-semibold text-base text-black">R{service.price}</p>
