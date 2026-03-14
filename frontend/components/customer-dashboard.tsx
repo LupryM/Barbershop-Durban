@@ -573,11 +573,15 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                     margin: 0;
                     width: 100%;
                   }
-                  .rdp-day_selected:not([disabled]) {
+                  .rdp-day[aria-selected="true"],
+                  .rdp-day_selected,
+                  .rdp-cell_selected .rdp-day {
                     background-color: var(--rdp-accent-color) !important;
                     color: white !important;
                     font-weight: 600;
                   }
+                  .rdp-day[aria-selected="true"]:focus-visible,
+                  .rdp-day[aria-selected="true"]:hover,
                   .rdp-day_selected:focus-visible,
                   .rdp-day_selected:hover {
                     background-color: var(--rdp-accent-color) !important;

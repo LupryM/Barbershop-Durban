@@ -514,7 +514,10 @@ namespace BarberShopBookingSystem.Controllers
 
     public class RescheduleDto
     {
+        [JsonPropertyName("newDate")]
         public DateTime NewDate { get; set; }
+
+        [JsonPropertyName("newTime")]
         public string NewTime { get; set; } = string.Empty;
     }
 
