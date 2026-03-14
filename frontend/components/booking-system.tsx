@@ -56,6 +56,30 @@ const DEFAULT_TIME_SLOTS = [
   "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
 ];
 
+/** Returns tomorrow if it's already 5pm or later, otherwise today */
+function getInitialBookingDate(): Date {
+  const now = new Date();
+  if (now.getHours() >= 17) {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  }
+  return now;
+}
+
+/** For a given date, remove any time slots that have already passed (today only) */
+function filterFutureSlots(slots: string[], selectedDate: Date | undefined): string[] {
+  if (!selectedDate) return slots;
+  const now = new Date();
+  const isToday =
+    selectedDate.getFullYear() === now.getFullYear() &&
+    selectedDate.getMonth() === now.getMonth() &&
+    selectedDate.getDate() === now.getDate();
+  if (!isToday) return slots;
+  const currentHour = now.getHours();
+  return slots.filter((slot) => parseInt(slot.split(":")[0], 10) > currentHour);
+}
+
 // ─── More Types ──────────────────────────────────────────────────────────────
 
 // ─── Step-level sub-components ────────────────────────────────────────────────
@@ -149,7 +173,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   const [step, setStep]               = useState(1);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedBarber, setSelectedBarber]   = useState<Barber | null>(null);
-  const [selectedDate, setSelectedDate]       = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate]       = useState<Date | undefined>(getInitialBookingDate());
   const [selectedTime, setSelectedTime]       = useState<string | null>(null);
   const [phoneState, setPhoneState]           = useState<string>("");
 
@@ -223,6 +247,14 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
   const [isRedirectingToPayment, setIsRedirectingToPayment] = useState(false);
   const [showPaymentWarning, setShowPaymentWarning] = useState(false);
 
+  /** Validate phone number - accepts 10 digits or +27 format */
+  const isValidPhoneNumber = (phone: string): boolean => {
+    const cleanPhone = phone.replace(/\s/g, "");
+    // Match 10 digits or +27 followed by 9 digits
+    const phoneRegex = /^(?:\d{10}|\+27\d{9})$/;
+    return phoneRegex.test(cleanPhone);
+  };
+
   /** Show the external-redirect warning modal before initiating payment */
   const handleConfirm = () => {
     if (!isLoggedIn || !user) {
@@ -231,6 +263,10 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
     }
     if (!phoneState.trim()) {
       toast.error("Please enter your phone number before confirming.");
+      return;
+    }
+    if (!isValidPhoneNumber(phoneState)) {
+      toast.error("Please enter a valid phone number (10 digits or +27 format).");
       return;
     }
     setShowPaymentWarning(true);
@@ -322,16 +358,44 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
     <section id="book" className="py-24 bg-white">
       <style>{`
         .rdp {
-          --rdp-cell-size: 40px;
+          --rdp-cell-size: 45px;
           --rdp-accent-color: #000000;
           --rdp-background-color: #f3f3f3;
           margin: 0;
+          width: 100%;
+        }
+        .rdp-caption {
+          padding: 0.5rem 0 1.5rem;
+          font-size: 1.1rem;
+          font-weight: 600;
+        }
+        .rdp-head_cell {
+          font-size: 0.9rem;
+          font-weight: 600;
+          padding: 0.5rem 0;
+        }
+        .rdp-cell {
+          width: 100%;
+        }
+        .rdp-day {
+          font-size: 0.95rem;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+        }
+        .rdp-day:hover:not(.rdp-day_disabled) {
+          background-color: var(--rdp-background-color);
+          cursor: pointer;
         }
         .rdp-day_selected,
         .rdp-day_selected:focus-visible,
         .rdp-day_selected:hover {
           background-color: var(--rdp-accent-color) !important;
           color: white !important;
+          font-weight: 600;
+        }
+        .rdp-day_disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
         }
       `}</style>
 
@@ -440,13 +504,13 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                   <StepHeader onBack={goPrev} title="Select Date & Time" />
 
                   <div className="grid md:grid-cols-2 gap-10">
-                    <div className="flex justify-center border border-black/10 p-4">
+                    <div className="flex justify-center border border-black/10 p-8 bg-black/[0.01]">
                       <DayPicker
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
                         disabled={{ before: new Date() }}
-                        className="p-0 m-0"
+                        className="p-0 m-0 w-full"
                       />
                     </div>
                     <div className="space-y-4">
@@ -456,8 +520,10 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                       <div className="grid grid-cols-2 gap-2">
                         {loadingSlotsData ? (
                           <p className="col-span-2 text-xs text-black/40 py-4">Loading available times...</p>
+                        ) : filterFutureSlots(DEFAULT_TIME_SLOTS, selectedDate).length === 0 ? (
+                          <p className="col-span-2 text-xs text-black/40 py-4">No more slots available today — select another date.</p>
                         ) : (
-                          DEFAULT_TIME_SLOTS.map((time) => {
+                          filterFutureSlots(DEFAULT_TIME_SLOTS, selectedDate).map((time) => {
                             const isOpen = availableSlots.includes(time);
                             const isSelected = selectedTime === time;
                             return (
@@ -533,7 +599,11 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                       </div>
 
                       {/* ── Phone Number ──────────────────────────────── */}
-                      <div className="border-2 border-black/10 p-5">
+                      <div className={`border-2 p-5 transition-colors ${
+                        phoneState && !isValidPhoneNumber(phoneState)
+                          ? "border-red-300 bg-red-50/40"
+                          : "border-black/10"
+                      }`}>
                         <label className="text-[10px] uppercase tracking-widest text-black/40 font-medium block mb-3">
                           Phone Number (For Updates)
                         </label>
@@ -541,9 +611,23 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
                           type="tel"
                           value={phoneState}
                           onChange={(e) => setPhoneState(e.target.value)}
-                          placeholder="e.g. 082 123 4567"
-                          className="w-full border-2 border-black/10 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+                          placeholder="e.g. 0821234567 or +27821234567"
+                          className={`w-full border-2 px-4 py-3 text-sm focus:outline-none transition-colors ${
+                            phoneState && isValidPhoneNumber(phoneState)
+                              ? "border-green-400 focus:border-green-500 bg-green-50/30"
+                              : phoneState && !isValidPhoneNumber(phoneState)
+                              ? "border-red-400 focus:border-red-500"
+                              : "border-black/10 focus:border-black"
+                          }`}
                         />
+                        {phoneState && !isValidPhoneNumber(phoneState) && (
+                          <p className="text-xs text-red-600 mt-2">
+                            Please enter a valid 10-digit number (082 123 4567) or +27 format (+27821234567)
+                          </p>
+                        )}
+                        {phoneState && isValidPhoneNumber(phoneState) && (
+                          <p className="text-xs text-green-600 mt-2">✓ Valid phone number</p>
+                        )}
                       </div>
 
                       {/* ── External Payment Notice ────────────────────── */}
