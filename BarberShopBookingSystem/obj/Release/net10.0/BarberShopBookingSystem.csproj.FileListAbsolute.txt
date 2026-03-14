@@ -135,3 +135,4 @@ C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Release\net10.0\BarberShopBookingSystem.pdb
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Release\net10.0\BarberShopBookingSystem.genruntimeconfig.cache
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Release\net10.0\ref\BarberShopBookingSystem.dll
+C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\bin\Release\net10.0\dotnet-tools.json

@@ -25,6 +25,10 @@ namespace BarberShopBookingSystem.Controllers
         [HttpPost("create-checkout")]
         public async Task<IActionResult> CreateCheckout([FromBody] PaymentRequest request)
         {
+            // 1. SECURITY FIX: Fetch the appointment to get the REAL price from the database!
+            var appointment = await _context.Appointments.FindAsync(request.AppointmentId);
+            if (appointment == null) return NotFound("Appointment not found.");
+
             var secretKey = _config["Yoco:SecretKey"];
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secretKey);
 
@@ -32,10 +36,12 @@ namespace BarberShopBookingSystem.Controllers
             // Use first URL if comma-separated list
             var baseUrl = frontendUrl.Split(',')[0].Trim().TrimEnd('/');
 
-            // Yoco expects amounts in cents (e.g., R100.00 = 10000)
+            // 2. SECURITY FIX: Use the backend price (appointment.TotalPrice), NOT request.Amount
+            var amountInCents = (int)(appointment.TotalPrice * 100);
+
             var payload = new
             {
-                amount = (int)(request.Amount * 100),
+                amount = amountInCents,
                 currency = "ZAR",
                 successUrl = $"{baseUrl}/payment-success?appointmentId={request.AppointmentId}",
                 cancelUrl = $"{baseUrl}/payment-cancelled?appointmentId={request.AppointmentId}"
@@ -43,6 +49,7 @@ namespace BarberShopBookingSystem.Controllers
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("https://payments.yoco.com/api/checkouts", content);
+
             if (!response.IsSuccessStatusCode)
             {
                 var yocoErrorDetails = await response.Content.ReadAsStringAsync();
@@ -52,10 +59,17 @@ namespace BarberShopBookingSystem.Controllers
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var yocoData = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
 
+            var checkoutId = yocoData.GetProperty("id").GetString();
+            var redirectUrl = yocoData.GetProperty("redirectUrl").GetString();
+
+            // 3. SECURITY FIX: Save the Yoco ID to the database so we can verify it later
+            appointment.YocoPaymentId = checkoutId;
+            await _context.SaveChangesAsync();
+
             return Ok(new
             {
-                redirectUrl = yocoData.GetProperty("redirectUrl").GetString(),
-                checkoutId = yocoData.GetProperty("id").GetString(),
+                redirectUrl = redirectUrl,
+                checkoutId = checkoutId,
             });
         }
 
@@ -65,17 +79,43 @@ namespace BarberShopBookingSystem.Controllers
             var appointment = await _context.Appointments.FindAsync(request.AppointmentId);
             if (appointment == null) return NotFound("Appointment not found.");
 
-            // Update the database to reflect the successful payment
-            appointment.PaymentStatus = "paid";
+            // Make sure we actually have a Yoco ID saved for this appointment
+            if (string.IsNullOrEmpty(appointment.YocoPaymentId))
+                return BadRequest("No Yoco checkout associated with this appointment.");
 
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Payment successfully recorded.", appointment });
+            // 4. SECURITY FIX: Ask Yoco directly if this specific checkout was paid!
+            var secretKey = _config["Yoco:SecretKey"];
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secretKey);
+
+            var response = await _httpClient.GetAsync($"https://payments.yoco.com/api/checkouts/{appointment.YocoPaymentId}");
+
+            if (!response.IsSuccessStatusCode)
+                return BadRequest("Could not verify payment with Yoco.");
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var yocoData = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
+
+            // 5. SECURITY FIX: Check Yoco's official status
+            if (yocoData.GetProperty("status").GetString() == "paid")
+            {
+                // Update the database to reflect the successful payment AND confirm the booking
+                appointment.PaymentStatus = "paid";
+                appointment.Status = "confirmed";
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Payment verified and successfully recorded.", appointment });
+            }
+
+            // If they just typed the URL into their browser but didn't pay:
+            return BadRequest("Payment has not been completed. Please finish the transaction on Yoco.");
         }
     }
 
     public class PaymentRequest
     {
+        // We leave this here so the frontend doesn't break, but we completely ignore it in the backend!
         public decimal Amount { get; set; }
+
         [JsonPropertyName("appointmentId")]
         public Guid AppointmentId { get; set; }
     }
