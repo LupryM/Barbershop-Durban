@@ -75,11 +75,26 @@ namespace BarberShopBookingSystem.Controllers
             var localTimeNow = DateTime.UtcNow.AddHours(2); // SAST
             var today = DateOnly.FromDateTime(localTimeNow);
 
+            bool needsSave = false;
+
+            // --- 🚨 THE NEW 10-MINUTE CART ABANDONMENT FIX 🚨 ---
+            var expiryTime = localTimeNow.AddMinutes(-10);
+            var abandonedBookings = await _context.Appointments
+                .Where(a => a.Status == "pending" && a.PaymentStatus == "unpaid" && a.CreatedAt < expiryTime)
+                .ToListAsync();
+
+            foreach (var abandoned in abandonedBookings)
+            {
+                abandoned.Status = "cancelled"; // Release the slot!
+                needsSave = true;
+            }
+            // ----------------------------------------------------
+
+            // Your existing stale check for 30-minute no-shows
             var staleCheck = await _context.Appointments
                 .Where(a => a.Status == "pending" && a.AppointmentDate <= today)
                 .ToListAsync();
 
-            bool needsSave = false;
             foreach (var appt in staleCheck)
             {
                 if (DateTime.TryParse($"{appt.AppointmentDate:yyyy-MM-dd} {appt.TimeSlot}", out DateTime apptTime))
@@ -91,6 +106,7 @@ namespace BarberShopBookingSystem.Controllers
                     }
                 }
             }
+
             if (needsSave) await _context.SaveChangesAsync();
 
             var query = _context.Appointments.AsQueryable();

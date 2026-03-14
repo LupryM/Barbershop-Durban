@@ -265,10 +265,11 @@ C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\staticwebassets.development.json
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\swae.build.ex.cache
-C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\BarberSh.2E0A4637.Up2Date
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\BarberShopBookingSystem.dll
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\refint\BarberShopBookingSystem.dll
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\BarberShopBookingSystem.pdb
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\BarberShopBookingSystem.genruntimeconfig.cache
 C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\ref\BarberShopBookingSystem.dll
+C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\bin\Debug\net10.0\dotnet-tools.json
+C:\Users\andzi\source\repos\LupryM\Barbershop-Durban\BarberShopBookingSystem\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
