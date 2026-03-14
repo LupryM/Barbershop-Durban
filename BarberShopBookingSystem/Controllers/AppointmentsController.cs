@@ -310,9 +310,9 @@ namespace BarberShopBookingSystem.Controllers
             return CreatedAtAction(nameof(GetMyAppointments), new { }, appointment);
         }
 
-        // DELETE /api/appointments/{id} 
+        // DELETE /api/appointments/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAppointment(Guid id)
+        public async Task<IActionResult> DeleteAppointment(Guid id, [FromServices] IEmailService emailService)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null) return Unauthorized();
@@ -335,6 +335,10 @@ namespace BarberShopBookingSystem.Controllers
 
             appointment.Status = "cancelled";
             await _context.SaveChangesAsync();
+
+            var customerEmail = User.FindFirst("email")?.Value;
+            if (!string.IsNullOrEmpty(customerEmail))
+                await emailService.SendSelfCancellationEmail(customerEmail, appointment.AppointmentDate.ToString("yyyy-MM-dd"), appointment.TimeSlot);
 
             return Ok(new { message = "Appointment cancelled." });
         }
@@ -360,7 +364,7 @@ namespace BarberShopBookingSystem.Controllers
 
         // PUT /api/appointments/{id}/reschedule
         [HttpPut("{id}/reschedule")]
-        public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleDto dto)
+        public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleDto dto, [FromServices] IEmailService emailService)
         {
             var appointment = await _context.Appointments.FindAsync(id);
             if (appointment == null) return NotFound();
@@ -391,6 +395,29 @@ namespace BarberShopBookingSystem.Controllers
             appointment.TimeSlot = dto.NewTime;
             appointment.RescheduleCount++;
             await _context.SaveChangesAsync();
+
+            var customerEmail = User.FindFirst("email")?.Value;
+            if (!string.IsNullOrEmpty(customerEmail))
+            {
+                var apptServices = await _context.AppointmentServices
+                    .Where(aps => aps.AppointmentId == appointment.Id)
+                    .ToListAsync();
+                var haircutIds = apptServices.Select(aps => aps.HaircutId).ToList();
+                var haircuts = await _context.Haircuts.Where(h => haircutIds.Contains(h.Id)).ToListAsync();
+                var serviceNames = string.Join(", ", haircuts.Select(h => h.Name));
+
+                var barber = appointment.BarberId.HasValue
+                    ? await _context.Barbers.FindAsync(appointment.BarberId.Value)
+                    : null;
+
+                await emailService.SendRescheduleEmail(
+                    customerEmail,
+                    newDate.ToString("yyyy-MM-dd"),
+                    dto.NewTime,
+                    serviceNames,
+                    barber?.FullName ?? "Your barber"
+                );
+            }
 
             return Ok(appointment);
         }

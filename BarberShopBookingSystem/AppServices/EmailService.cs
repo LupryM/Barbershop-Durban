@@ -6,7 +6,9 @@ namespace BarberShopBookingSystem.Services
     public interface IEmailService
     {
         Task SendCancellationEmail(string customerEmail, string date, string time);
+        Task SendSelfCancellationEmail(string customerEmail, string date, string time);
         Task SendBookingConfirmationEmail(string customerEmail, string date, string time, string services, string barberName, string totalPrice);
+        Task SendRescheduleEmail(string customerEmail, string newDate, string newTime, string services, string barberName);
         Task SendWelcomeEmail(string customerEmail, string fullName);
     }
 
@@ -60,6 +62,26 @@ namespace BarberShopBookingSystem.Services
                 to: customerEmail,
                 subject: "Booking Confirmed — Xclusive Barber",
                 payload: new { date, time, services, barberName, totalPrice }
+            );
+        }
+
+        public Task SendSelfCancellationEmail(string customerEmail, string date, string time)
+        {
+            return SendEmail(
+                type: "SELF_CANCELLATION",
+                to: customerEmail,
+                subject: "Your Appointment Has Been Cancelled",
+                payload: new { date, time }
+            );
+        }
+
+        public Task SendRescheduleEmail(string customerEmail, string newDate, string newTime, string services, string barberName)
+        {
+            return SendEmail(
+                type: "RESCHEDULE",
+                to: customerEmail,
+                subject: "Appointment Rescheduled — Xclusive Barber",
+                payload: new { newDate, newTime, services, barberName }
             );
         }
 
