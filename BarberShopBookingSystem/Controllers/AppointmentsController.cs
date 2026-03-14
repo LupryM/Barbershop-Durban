@@ -362,18 +362,36 @@ namespace BarberShopBookingSystem.Controllers
 
             var newDate = DateOnly.FromDateTime(dto.NewDate);
 
-            var conflict = await _context.Appointments.AnyAsync(a =>
-                a.Id != id &&
-                a.BarberId == appointment.BarberId &&
-                a.AppointmentDate == newDate &&
-                a.TimeSlot == dto.NewTime &&
-                a.Status != "cancelled");
+            // 🚨 THE FIX: Check if ANY barber in the shop is free at this new time!
+            var allActiveBarbers = await _context.Barbers.Where(b => b.Available).ToListAsync();
 
-            if (conflict) return BadRequest("The new time slot is already taken.");
+            // Find all appointments for the new date (ignoring this exact appointment and cancelled ones)
+            var todaysAppointments = await _context.Appointments
+                .Where(a => a.AppointmentDate == newDate && a.Status != "cancelled" && a.Id != id)
+                .ToListAsync();
 
+            // Find which barbers are busy at the exact requested time
+            var bookedBarberIdsForSlot = todaysAppointments
+                .Where(a => a.TimeSlot == dto.NewTime)
+                .Select(a => a.BarberId)
+                .ToList();
+
+            // Find an available barber, prioritizing the one with the fewest appointments today
+            var availableBarber = allActiveBarbers
+                .Where(b => !bookedBarberIdsForSlot.Contains(b.Id))
+                .OrderBy(b => todaysAppointments.Count(a => a.BarberId == b.Id))
+                .ThenBy(b => Guid.NewGuid())
+                .FirstOrDefault();
+
+            if (availableBarber == null)
+                return BadRequest("The new time slot is completely booked. Please choose another time.");
+
+            // Success! Update the date, time, and reassign the barber if necessary
+            appointment.BarberId = availableBarber.Id;
             appointment.AppointmentDate = newDate;
             appointment.TimeSlot = dto.NewTime;
             appointment.RescheduleCount++;
+
             await _context.SaveChangesAsync();
 
             return Ok(appointment);
