@@ -126,10 +126,6 @@ namespace BarberShopBookingSystem.Controllers
                 }
                 catch (Exception)
                 {
-                    // SAFETY NET: If Next.js fires two requests at the exact same millisecond 
-                    // and they collide trying to clean up the same abandoned carts, 
-                    // we just ignore the error. The winning request already did the cleanup!
-
                     // Clear the tracked changes so the context doesn't stay poisoned
                     _context.ChangeTracker.Clear();
                 }
@@ -226,7 +222,6 @@ namespace BarberShopBookingSystem.Controllers
                 return BadRequest(new { error = "Could not read the appointment time format." });
             }
 
-            // --- THE NEW MULTI-SERVICE CART MATH ---
             if (dto.HaircutIds == null || !dto.HaircutIds.Any())
                 return BadRequest(new { error = "You must select at least one service." });
 
@@ -239,7 +234,6 @@ namespace BarberShopBookingSystem.Controllers
 
             decimal finalPrice = selectedHaircuts.Sum(h => h.Price) - dto.DiscountAmount;
             int totalDuration = selectedHaircuts.Sum(h => h.DurationMinutes);
-            // ---------------------------------------
 
             var allActiveBarbers = await _context.Barbers.Where(b => b.Available).ToListAsync();
             var targetDate = dto.AppointmentDate;
@@ -278,13 +272,9 @@ namespace BarberShopBookingSystem.Controllers
                 CustomerPhone = dto.CustomerPhone
             };
 
-            // 1. ADD THE APPOINTMENT FIRST
             _context.Appointments.Add(appointment);
-
-            // 2. SAVE IT TO THE DATABASE SO THE ID EXISTS
             await _context.SaveChangesAsync();
 
-            // 3. NOW SAVE THE SERVICES TO THE JUNCTION TABLE
             foreach (var haircut in selectedHaircuts)
             {
                 _context.AppointmentServices.Add(new AppointmentService
@@ -294,24 +284,9 @@ namespace BarberShopBookingSystem.Controllers
                 });
             }
 
-            // 4. SAVE THE BRIDGE RECORDS
             await _context.SaveChangesAsync();
 
-            // 5. SEND BOOKING CONFIRMATION EMAIL
-            // Get email from JWT claim — more reliable than profile lookup since Email can be null
-            var customerEmail = User.FindFirst("email")?.Value;
-            if (!string.IsNullOrEmpty(customerEmail))
-            {
-                var serviceNames = string.Join(", ", selectedHaircuts.Select(h => h.Name));
-                await emailService.SendBookingConfirmationEmail(
-                    customerEmail,
-                    appointment.AppointmentDate.ToString("yyyy-MM-dd"),
-                    appointment.TimeSlot,
-                    serviceNames,
-                    assignedBarber.FullName,
-                    $"R{appointment.TotalPrice:F0}"
-                );
-            }
+            // Removed the empty email block here since PaymentsController handles booking confirmation now!
 
             return CreatedAtAction(nameof(GetMyAppointments), new { }, appointment);
         }
@@ -342,7 +317,10 @@ namespace BarberShopBookingSystem.Controllers
             appointment.Status = "cancelled";
             await _context.SaveChangesAsync();
 
-            var customerEmail = User.FindFirst("email")?.Value;
+            // 🚨 THE FIX: Look up email from the DB instead of the JWT claim for customer cancellations!
+            var profile = await _context.Profiles.FindAsync(userId);
+            var customerEmail = profile?.Email;
+
             if (!string.IsNullOrEmpty(customerEmail))
                 await emailService.SendSelfCancellationEmail(customerEmail, appointment.AppointmentDate.ToString("yyyy-MM-dd"), appointment.TimeSlot);
 
@@ -372,7 +350,6 @@ namespace BarberShopBookingSystem.Controllers
         [HttpPut("{id}/reschedule")]
         public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleDto dto, [FromServices] IEmailService emailService)
         {
-            // 🚨 THE NEW OPTION A FIX: Reject any time that isn't exactly on the hour!
             if (!dto.NewTime.EndsWith(":00"))
             {
                 return BadRequest("Appointments can only be rescheduled to exactly on the hour (e.g., 09:00, 10:00).");
@@ -393,22 +370,17 @@ namespace BarberShopBookingSystem.Controllers
             }
 
             var newDate = DateOnly.FromDateTime(dto.NewDate);
-
-            // 🚨 THE FIX: Check if ANY barber in the shop is free at this new time!
             var allActiveBarbers = await _context.Barbers.Where(b => b.Available).ToListAsync();
 
-            // Find all appointments for the new date (ignoring this exact appointment and cancelled ones)
             var todaysAppointments = await _context.Appointments
                 .Where(a => a.AppointmentDate == newDate && a.Status != "cancelled" && a.Id != id)
                 .ToListAsync();
 
-            // Find which barbers are busy at the exact requested time
             var bookedBarberIdsForSlot = todaysAppointments
                 .Where(a => a.TimeSlot == dto.NewTime)
                 .Select(a => a.BarberId)
                 .ToList();
 
-            // Find an available barber, prioritizing the one with the fewest appointments today
             var availableBarber = allActiveBarbers
                 .Where(b => !bookedBarberIdsForSlot.Contains(b.Id))
                 .OrderBy(b => todaysAppointments.Count(a => a.BarberId == b.Id))
@@ -418,7 +390,6 @@ namespace BarberShopBookingSystem.Controllers
             if (availableBarber == null)
                 return BadRequest("The new time slot is completely booked. Please choose another time.");
 
-            // Success! Update the date, time, and reassign the barber if necessary
             appointment.BarberId = availableBarber.Id;
             appointment.AppointmentDate = newDate;
             appointment.TimeSlot = dto.NewTime;
@@ -426,7 +397,10 @@ namespace BarberShopBookingSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            var customerEmail = User.FindFirst("email")?.Value;
+            // 🚨 THE FIX: Look up email from the DB instead of the JWT claim for reschedules!
+            var profile = await _context.Profiles.FindAsync(appointment.UserId);
+            var customerEmail = profile?.Email;
+
             if (!string.IsNullOrEmpty(customerEmail))
             {
                 var apptServices = await _context.AppointmentServices
@@ -461,7 +435,6 @@ namespace BarberShopBookingSystem.Controllers
 
             var userProfile = await _context.Profiles.FindAsync(Guid.Parse(userIdClaim));
 
-            // THE FIX: Allow both admins AND barbers to use this button!
             if (userProfile == null || (userProfile.Role != "admin" && userProfile.Role != "barber"))
                 return Forbid();
 

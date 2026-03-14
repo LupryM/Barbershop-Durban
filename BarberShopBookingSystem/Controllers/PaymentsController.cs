@@ -1,5 +1,7 @@
 ﻿using BarberShopBookingSystem.Data;
+using BarberShopBookingSystem.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -73,8 +75,9 @@ namespace BarberShopBookingSystem.Controllers
             });
         }
 
+        // 🚨 ADDED [FromServices] IEmailService here so we can send the email!
         [HttpPost("confirm")]
-        public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest request)
+        public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest request, [FromServices] IEmailService emailService)
         {
             var appointment = await _context.Appointments.FindAsync(request.AppointmentId);
             if (appointment == null) return NotFound("Appointment not found.");
@@ -103,8 +106,44 @@ namespace BarberShopBookingSystem.Controllers
                 // Update the database to reflect the successful payment AND confirm the booking
                 appointment.PaymentStatus = "paid";
                 appointment.Status = "confirmed";
-
                 await _context.SaveChangesAsync();
+
+                // 🚨 THE FIX: SEND THE CONFIRMATION EMAIL HERE 🚨
+                try
+                {
+                    // Look up the user's email directly from the database
+                    var profile = await _context.Profiles.FindAsync(appointment.UserId);
+                    var customerEmail = profile?.Email;
+
+                    if (!string.IsNullOrEmpty(customerEmail))
+                    {
+                        var barber = await _context.Barbers.FindAsync(appointment.BarberId);
+                        var barberName = barber?.FullName ?? "Your Barber";
+
+                        var apptServices = await _context.AppointmentServices
+                            .Where(aps => aps.AppointmentId == appointment.Id)
+                            .ToListAsync();
+
+                        var haircutIds = apptServices.Select(aps => aps.HaircutId).ToList();
+                        var haircuts = await _context.Haircuts.Where(h => haircutIds.Contains(h.Id)).ToListAsync();
+                        var serviceNames = haircuts.Any() ? string.Join(", ", haircuts.Select(h => h.Name)) : "Haircut Service";
+
+                        await emailService.SendBookingConfirmationEmail(
+                            customerEmail,
+                            appointment.AppointmentDate.ToString("yyyy-MM-dd"),
+                            appointment.TimeSlot,
+                            serviceNames,
+                            barberName,
+                            $"R{appointment.TotalPrice:F0}"
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // If the email fails, we log it, but we still return OK to the frontend so the user sees "Success"
+                    Console.WriteLine($"Payment succeeded, but email failed: {ex.Message}");
+                }
+
                 return Ok(new { message = "Payment verified and successfully recorded.", appointment });
             }
 
