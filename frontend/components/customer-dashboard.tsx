@@ -45,7 +45,10 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
   const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
   const [rescheduleTime, setRescheduleTime] = useState<string | null>(null);
   const [availableRescheduleSlots, setAvailableRescheduleSlots] = useState<string[]>([]);
+  const [loadingRescheduleSlots, setLoadingRescheduleSlots] = useState(false);
   const [isRescheduling, setIsRescheduling] = useState(false);
+
+  const ALL_TIME_SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
   useEffect(() => {
     if (!rescheduleDate) {
@@ -53,15 +56,16 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
       return;
     }
     const fetchSlots = async () => {
+      setLoadingRescheduleSlots(true);
       try {
         const dateStr = format(rescheduleDate, "yyyy-MM-dd");
         const res = await fetch(`/api/availability?date=${dateStr}`);
         const data = await res.json();
-        setAvailableRescheduleSlots(data.available_slots || [
-          "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"
-        ]);
+        setAvailableRescheduleSlots(data.available_slots || ALL_TIME_SLOTS);
       } catch (error) {
         setAvailableRescheduleSlots([]);
+      } finally {
+        setLoadingRescheduleSlots(false);
       }
     };
     fetchSlots();
@@ -615,24 +619,33 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                 {!rescheduleDate && (
                   <p className="text-xs text-black/40 py-4 text-center bg-black/5 p-3">Select a date to see available times</p>
                 )}
-                {rescheduleDate && availableRescheduleSlots.length === 0 && (
-                  <p className="text-xs text-black/40 py-4 text-center bg-black/5 p-3">No available times for this date</p>
+                {rescheduleDate && loadingRescheduleSlots && (
+                  <p className="text-xs text-black/40 py-4 text-center bg-black/5 p-3">Loading available times...</p>
                 )}
-                <div className="grid grid-cols-3 gap-2">
-                  {availableRescheduleSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => setRescheduleTime(time)}
-                      className={`p-3 text-xs font-medium border-2 transition-all rounded ${
-                        rescheduleTime === time
-                          ? "bg-black text-white border-black"
-                          : "border-black/10 hover:border-black text-black hover:bg-black/5"
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+                {rescheduleDate && !loadingRescheduleSlots && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {ALL_TIME_SLOTS.map((time) => {
+                      const isOpen = availableRescheduleSlots.includes(time);
+                      const isSelected = rescheduleTime === time;
+                      return (
+                        <button
+                          key={time}
+                          onClick={() => isOpen && setRescheduleTime(time)}
+                          disabled={!isOpen}
+                          className={`p-3 text-xs font-medium border-2 transition-all rounded ${
+                            isSelected
+                              ? "bg-black text-white border-black"
+                              : isOpen
+                              ? "border-black/10 hover:border-black text-black hover:bg-black/5"
+                              : "border-black/5 text-black/20 bg-black/[0.02] cursor-not-allowed line-through"
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Selected info */}
