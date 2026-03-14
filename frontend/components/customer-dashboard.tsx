@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useAuth, type AuthUser } from '@/context/auth-context';
 import { updateProfile, updateUserEmail } from '@/lib/supabase-auth';
 
-// Shape returned by GET /api/appointments
+// Shape returned by GET /api/appointments/my-appointments
 interface AppointmentRow {
   id: number;
   appointment_date: string;
@@ -19,8 +19,8 @@ interface AppointmentRow {
   total_price: number | null;
   payment_status: string;
   created_at: string;
-  haircuts: { name: string; price: number; duration_minutes?: number } | null;
-  barbers:  { full_name: string } | null;
+  services: string | null;
+  barbers: { full_name: string } | null;
 }
 
 type ActiveTab = 'appointments' | 'profile';
@@ -324,7 +324,7 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                         <div key={appt.id} className="border-2 border-black/10 p-6 hover:border-accent/30 transition-colors">
                           <div className="flex justify-between items-start mb-6">
                             <div>
-                              <h3 className="text-lg font-light mb-1">{appt.haircuts?.name ?? '—'}</h3>
+                              <h3 className="text-lg font-light mb-1">{appt.services ?? '—'}</h3>
                               <p className="text-xs text-black/40">with {appt.barbers?.full_name ?? '—'}</p>
                             </div>
                             <span className={`px-3 py-1 text-[10px] uppercase tracking-widest font-medium ${
@@ -344,11 +344,6 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                             <div className="flex items-center gap-3 text-sm text-black/60">
                               <Clock className="w-4 h-4 text-black/30" />
                               {appt.time_slot}
-                              {appt.haircuts?.duration_minutes && (
-                                <span className="text-black/40 text-xs">
-                                  — {appt.haircuts.duration_minutes} min
-                                </span>
-                              )}
                             </div>
                             {appt.total_price != null && (
                               <div className="text-sm font-medium">R{appt.total_price}</div>
@@ -395,7 +390,7 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                         <tbody>
                           {past.map((appt) => (
                             <tr key={appt.id} className="border-b border-black/5 hover:bg-black/[0.02]">
-                              <td className="px-6 py-4 text-sm">{appt.haircuts?.name ?? '—'}</td>
+                              <td className="px-6 py-4 text-sm">{appt.services ?? '—'}</td>
                               <td className="px-6 py-4 text-sm text-black/40">{appt.barbers?.full_name ?? '—'}</td>
                               <td className="px-6 py-4 text-sm text-black/40">
                                 {format(new Date(appt.appointment_date), 'MMM d, yyyy')}
@@ -578,11 +573,15 @@ export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initia
                     margin: 0;
                     width: 100%;
                   }
-                  .rdp-day_selected:not([disabled]) {
+                  .rdp-day[aria-selected="true"],
+                  .rdp-day_selected,
+                  .rdp-cell_selected .rdp-day {
                     background-color: var(--rdp-accent-color) !important;
                     color: white !important;
                     font-weight: 600;
                   }
+                  .rdp-day[aria-selected="true"]:focus-visible,
+                  .rdp-day[aria-selected="true"]:hover,
                   .rdp-day_selected:focus-visible,
                   .rdp-day_selected:hover {
                     background-color: var(--rdp-accent-color) !important;
