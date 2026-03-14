@@ -8,7 +8,7 @@ import { DayPicker } from 'react-day-picker';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useAuth, type AuthUser } from '@/context/auth-context';
-import { updateProfile } from '@/lib/supabase-auth';
+import { updateProfile, updateUserEmail } from '@/lib/supabase-auth';
 
 // Shape returned by GET /api/appointments
 interface AppointmentRow {
@@ -25,16 +25,18 @@ interface AppointmentRow {
 
 type ActiveTab = 'appointments' | 'profile';
 
-export function CustomerDashboard({ user }: { user: AuthUser }) {
+export function CustomerDashboard({ user, initialTab }: { user: AuthUser; initialTab?: ActiveTab | null }) {
   const router = useRouter();
   const { logout, accessToken, updateUser } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('appointments');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab === 'profile' ? 'profile' : 'appointments');
 
   // Profile edit state
   const [editName, setEditName] = useState(user.name || '');
+  const [editEmail, setEditEmail] = useState(user.email || '');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
 
   // Reschedule state
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
@@ -141,17 +143,49 @@ export function CustomerDashboard({ user }: { user: AuthUser }) {
 
   const handleSaveProfile = async () => {
     const trimmedName = editName.trim();
+    const trimmedEmail = editEmail.trim();
+
     if (!trimmedName) {
       toast.error('Name cannot be empty');
       return;
     }
+
+    if (!trimmedEmail) {
+      toast.error('Email cannot be empty');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setSavingProfile(true);
     try {
-      await updateProfile(user.id, { name: trimmedName });
+      const updates: any = { name: trimmedName };
+
+      // Update email in Supabase Auth if it changed
+      if (trimmedEmail !== user.email) {
+        try {
+          await updateUserEmail(trimmedEmail);
+          updates.email = trimmedEmail;
+          setEmailVerificationSent(true);
+          toast.success('Email updated! A verification link has been sent to your new email address.');
+        } catch (emailError: any) {
+          toast.error(emailError.message || 'Failed to update email');
+          setSavingProfile(false);
+          return;
+        }
+      }
+
+      // Update profile with name and email in profiles table
+      await updateProfile(user.id, updates);
       updateUser({ name: trimmedName });
-      toast.success('Profile updated');
-    } catch {
-      toast.error('Failed to update profile');
+      toast.success('Profile updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setSavingProfile(false);
     }
@@ -194,10 +228,13 @@ export function CustomerDashboard({ user }: { user: AuthUser }) {
             </span>
           </Link>
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-2 text-sm text-white/60 font-semibold font-montserrat">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className="hidden md:flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat"
+            >
               <User className="w-4 h-4" />
               {user.name || 'Guest'}
-            </div>
+            </button>
             <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors font-semibold font-montserrat flex items-center gap-2">
               <Home className="w-4 h-4" /> Home
             </Link>
@@ -414,14 +451,35 @@ export function CustomerDashboard({ user }: { user: AuthUser }) {
                   </div>
                 </div>
 
-                {/* Email — read-only */}
+                {/* Email — editable */}
                 <div className="p-6">
                   <label className="text-[10px] uppercase tracking-widest text-black/40 font-medium block mb-3">
                     Email Address
                   </label>
-                  <p className="text-sm text-black/70">{user.email}</p>
-                  <p className="text-[11px] text-black/30 mt-1">
-                    Email is managed through your sign-in provider and cannot be changed here.
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className="flex-1 border-2 border-black/10 px-4 py-2.5 text-sm focus:outline-none focus:border-black transition-colors bg-white"
+                    />
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={savingProfile || (editEmail.trim() === user.email && editName.trim() === user.name)}
+                      className="px-5 py-2.5 bg-accent text-accent-foreground text-xs uppercase tracking-widest font-semibold font-montserrat hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      {savingProfile ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                  {emailVerificationSent && (
+                    <p className="text-[11px] text-accent mt-2">
+                      ✓ Verification email sent. Check your inbox to confirm the change.
+                    </p>
+                  )}
+                  <p className="text-[11px] text-black/30 mt-2">
+                    Changing your email will require verification via a link sent to your new email address.
                   </p>
                 </div>
 

@@ -135,6 +135,7 @@ export async function updateProfile(userId: string, updates: Partial<CreateProfi
     .from('profiles')
     .update({
       ...(updates.name && { full_name: updates.name }),
+      ...(updates.email && { email: updates.email }),
       ...(updates.role && { role: updates.role }),
     })
     .eq('id', userId)
@@ -143,6 +144,23 @@ export async function updateProfile(userId: string, updates: Partial<CreateProfi
 
   if (error) {
     throw new Error(error.message || 'Failed to update profile');
+  }
+
+  return data;
+}
+
+/**
+ * Update user email in Supabase Auth
+ * Note: Supabase may require email verification depending on settings
+ */
+export async function updateUserEmail(newEmail: string) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.updateUser({
+    email: newEmail,
+  });
+
+  if (error) {
+    throw new Error(error.message || 'Failed to update email');
   }
 
   return data;
