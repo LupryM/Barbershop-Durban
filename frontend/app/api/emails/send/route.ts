@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import { CancellationEmail } from '@/emails/CancellationEmail';
 import { BookingConfirmationEmail } from '@/emails/BookingConfirmationEmail';
+import { RescheduleEmail } from '@/emails/RescheduleEmail';
 import { WelcomeEmail } from '@/emails/WelcomeEmail';
 import { NewsletterEmail } from '@/emails/NewsletterEmail';
 import { NextResponse } from 'next/server';
@@ -31,6 +32,19 @@ export async function POST(req: Request) {
         barberName: payload.barberName,
         totalPrice: payload.totalPrice,
       })
+    );
+  } else if (type === 'RESCHEDULE') {
+    emailHtml = await render(
+      RescheduleEmail({
+        newDate: payload.newDate,
+        newTime: payload.newTime,
+        services: payload.services,
+        barberName: payload.barberName,
+      })
+    );
+  } else if (type === 'SELF_CANCELLATION') {
+    emailHtml = await render(
+      CancellationEmail({ date: payload.date, time: payload.time })
     );
   } else if (type === 'WELCOME') {
     emailHtml = await render(WelcomeEmail({ fullName: payload.fullName }));
