@@ -1,4 +1,4 @@
-﻿using BarberShopBookingSystem.Data;
+using BarberShopBookingSystem.Data;
 using BarberShopBookingSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +54,10 @@ namespace BarberShopBookingSystem.Controllers
                 amount = amountInCents,
                 currency = "ZAR",
                 successUrl = $"{baseUrl}/payment-success?appointmentId={request.AppointmentId}",
-                cancelUrl = $"{baseUrl}/payment-cancelled?appointmentId={request.AppointmentId}"
+                cancelUrl = $"{baseUrl}/payment-cancelled?appointmentId={request.AppointmentId}",
+                metadata = new {
+                    appointmentId = request.AppointmentId.ToString()
+                }
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -218,25 +221,27 @@ namespace BarberShopBookingSystem.Controllers
             if (eventType != "payment.succeeded")
                 return Ok(new { message = $"Event '{eventType}' acknowledged." });
 
-            // Extract the checkout ID from the event payload
+            // Extract the metadata from the event payload
             if (!webhookEvent.TryGetProperty("payload", out var payloadProp))
                 return BadRequest("Missing 'payload' in webhook event.");
 
-            var checkoutId = payloadProp.TryGetProperty("id", out var idProp)
-                ? idProp.GetString()
+            if (!payloadProp.TryGetProperty("metadata", out var metadataProp))
+                return BadRequest("Missing 'metadata' in webhook payload.");
+
+            var appointmentIdString = metadataProp.TryGetProperty("appointmentId", out var apptIdProp)
+                ? apptIdProp.GetString()
                 : null;
 
-            if (string.IsNullOrEmpty(checkoutId))
-                return BadRequest("Missing checkout ID in webhook payload.");
+            if (string.IsNullOrEmpty(appointmentIdString) || !Guid.TryParse(appointmentIdString, out Guid appointmentId))
+                return BadRequest("Missing or invalid 'appointmentId' in webhook metadata.");
 
             // Find the matching appointment
-            var appointment = await _context.Appointments
-                .FirstOrDefaultAsync(a => a.YocoPaymentId == checkoutId);
+            var appointment = await _context.Appointments.FindAsync(appointmentId);
 
             if (appointment == null)
             {
                 // Could arrive before create-checkout stores the ID; return 404 so Yoco retries
-                return NotFound($"No appointment found for checkout '{checkoutId}'.");
+                return NotFound($"No appointment found for ID '{appointmentIdString}'.");
             }
 
             // Idempotency guard — Yoco may deliver the same event more than once
