@@ -204,7 +204,7 @@ export function BookingSystem({ hideTitle = false }: { hideTitle?: boolean }) {
         // ── TEMPORARY EASTER WEEKEND OVERRIDE (remove after 2026-04-06) ──────
         // Fri 2026-04-03 & Sat 2026-04-04: close at 13:00 (last slot 12:00)
         // Sun 2026-04-05: closed
-        if (dateStr === "2026-04-05") {
+        if (dateStr === "2026-04-05" || dateStr === "2026-06-30") {
           slots = [];
         } else if (dateStr === "2026-04-03" || dateStr === "2026-04-04") {
           slots = slots.filter((t) => t < "13:00");
