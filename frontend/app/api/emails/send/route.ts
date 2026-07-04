@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     );
   } else if (type === 'SELF_CANCELLATION') {
     emailHtml = await render(
-      CancellationEmail({ date: payload.date, time: payload.time })
+      CancellationEmail({ date: payload.date, time: payload.time, isSelfCancellation: true })
     );
   } else if (type === 'WELCOME') {
     emailHtml = await render(WelcomeEmail({ fullName: payload.fullName }));

@@ -13,9 +13,10 @@ import {
 interface CancellationEmailProps {
   date: string;
   time: string;
+  isSelfCancellation?: boolean;
 }
 
-export function CancellationEmail({ date, time }: CancellationEmailProps) {
+export function CancellationEmail({ date, time, isSelfCancellation }: CancellationEmailProps) {
   return (
     <Html>
       <Head />
@@ -40,10 +41,19 @@ export function CancellationEmail({ date, time }: CancellationEmailProps) {
             <Heading as="h2" style={heading}>Appointment Cancelled</Heading>
             <Text style={paragraph}>Hi there,</Text>
             <Text style={paragraph}>
-              Unfortunately, your appointment scheduled for{' '}
-              <span style={highlight}>{date}</span> at{' '}
-              <span style={highlight}>{time}</span> has been cancelled as the
-              barber is no longer available.
+              {isSelfCancellation ? (
+                <>
+                  Your appointment scheduled for <span style={highlight}>{date}</span> at{' '}
+                  <span style={highlight}>{time}</span> has been successfully cancelled as requested.
+                </>
+              ) : (
+                <>
+                  Unfortunately, your appointment scheduled for{' '}
+                  <span style={highlight}>{date}</span> at{' '}
+                  <span style={highlight}>{time}</span> has been cancelled as the
+                  barber is no longer available.
+                </>
+              )}
             </Text>
             <Text style={paragraph}>
               We sincerely apologize for the inconvenience. Please log in to
