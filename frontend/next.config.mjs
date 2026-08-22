@@ -45,6 +45,10 @@ const nextConfig = {
         source: '/api/payments/:path*',
         destination: `${backendUrl}/api/payments/:path*`,
       },
+      {
+        source: '/api/closeddates/:path*',
+        destination: `${backendUrl}/api/closeddates/:path*`,
+      },
     ];
   },
 }
