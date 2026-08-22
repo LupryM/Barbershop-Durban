@@ -110,3 +110,10 @@ CREATE TRIGGER on_auth_user_email_changed
 CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_no_double_book
   ON appointments (barber_id, appointment_date, time_slot)
   WHERE status <> 'cancelled';
+
+-- 5. Closed Dates table (for admin dynamically closing the shop)
+CREATE TABLE IF NOT EXISTS closed_dates (
+  date DATE PRIMARY KEY,
+  reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

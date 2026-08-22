@@ -148,6 +148,10 @@ namespace BarberShopBookingSystem.Controllers
             if (!DateOnly.TryParse(date, out var targetDate))
                 return BadRequest(new { error = "Invalid date format. Use YYYY-MM-DD." });
 
+            var isClosed = await _context.ClosedDates.AnyAsync(d => d.Date == targetDate);
+            if (isClosed)
+                return Ok(new List<string>());
+
             var totalActiveBarbers = await _context.Barbers.CountAsync(b => b.Available);
             if (totalActiveBarbers == 0)
                 return Ok(new List<string>());

@@ -1,4 +1,4 @@
-﻿using BarberShopBookingSystem.Models;
+using BarberShopBookingSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BarberShopBookingSystem.Data
@@ -14,6 +14,7 @@ namespace BarberShopBookingSystem.Data
         public DbSet<Haircut> Haircuts { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Profile> Profiles { get; set; } // Added for user roles and Auth link
+        public DbSet<ClosedDate> ClosedDates { get; set; } // Added for closing dates
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +26,7 @@ namespace BarberShopBookingSystem.Data
             modelBuilder.Entity<Haircut>().ToTable("haircuts");
             modelBuilder.Entity<Appointment>().ToTable("appointments");
             modelBuilder.Entity<Profile>().ToTable("profiles");
+            modelBuilder.Entity<ClosedDate>().ToTable("closed_dates");
 
             // Optional: Ensure Price in Haircuts handles decimal correctly for ZAR
             modelBuilder.Entity<Haircut>()
