@@ -132,6 +132,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -140,6 +144,15 @@ export default function RootLayout({
       <body className={`${montserrat.variable} ${poppins.variable} ${openSans.variable} font-sans antialiased`}>
         <AuthProvider>
           {children}
+          <a
+            href="https://wa.me/27611810056"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300"
+            aria-label="Chat with us on WhatsApp"
+          >
+            <i className="fa-brands fa-whatsapp text-3xl"></i>
+          </a>
         </AuthProvider>
         <Analytics />
       </body>

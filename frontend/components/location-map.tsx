@@ -10,7 +10,7 @@ export function LocationMap() {
     province: "Davenport",
     postalCode: "4001",
     country: "South Africa",
-    phone: "068 425 0060",
+    phone: "+27 61 181 0056",
     email: "info@xclusivebarber.co.za",
     lat: -29.8587,
     lng: 31.0218,
